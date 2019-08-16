@@ -1,4 +1,4 @@
-﻿// Copyright 2012 Adobe Systems Incorporated.  All Rights reserved.
+// Copyright 2012 Adobe Systems Incorporated.  All Rights reserved.
 
 // IMPORTANT: This file MUST be written out from ESTK with the option to write the UTF-8
 // signature turned ON (Edit > Preferences > Documents > UTF-8 Signature).  Otherwise,
@@ -1550,8 +1550,8 @@ cssToClip.getShapeLayerCSS = function( boundsInfo )
 	{
 		if (gradientCSS)
 		{
-			for (i in this.browserTags)
-				this.addText( "background-image: " + this.browserTags[i] + gradientCSS);
+			// for (i in this.browserTags)
+				this.addText( "background-image: " + gradientCSS);
 		}
 		else
 		{
@@ -1687,7 +1687,7 @@ cssToClip.getTextLayerCSS = function( boundsInfo )
 				&& (m[4] == 0) && (m[5] == 0)))
 			{
 				boundsInfo.rawTextBounds = baseDesc.getVal("boundingBox").extractBounds();
-				this.addText("transform: matrix( " + m.join(",") + ");", this.browserTags );
+				this.addText("transform: matrix(" + m.join(", ") + ");");
 			}
 		}
 		else
@@ -1696,7 +1696,7 @@ cssToClip.getTextLayerCSS = function( boundsInfo )
 			if ((vScale != 1.0) || (hScale != 1.0))
 			{
 				boundsInfo.rawTextBounds = baseDesc.getVal("boundingBox").extractBounds();
-				this.addText( "transform: scale(" + hScale + ", " + vScale + ");", this.browserTags );
+				this.addText( "transform: scale(" + hScale + ", " + vScale + ");");
 			}
 		}
 	}
