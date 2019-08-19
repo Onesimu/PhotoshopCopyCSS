@@ -1011,8 +1011,9 @@ cssToClip.reset = function()
 {
 	this.pluginName = "CSSToClipboard";
 	this.cssText = "";
+	this.htmlText = "";
 	this.indentSpaces = "";
-	this.browserTags = ["-moz-", "-webkit-", "-ms-"];
+	// this.browserTags = ["-moz-", "-webkit-", "-ms-"];
 	this.currentLayer = null;
 	this.currentPSLayerInfo = null;
 
@@ -1049,7 +1050,7 @@ cssToClip.copyTextToClipboard = function( txt )
 cssToClip.copyCSSToClipboard = function()
 {
 	this.logToHeadlights("Copy to CSS invoked");
-	this.copyTextToClipboard( this.cssText );
+	this.copyTextToClipboard( '<div>\n' + this.htmlText + '</div>\n' + '\n<style>\n' + this.cssText + '</style>\n');
 }
 
 cssToClip.isCSSLayerKind = function( layerKind )
@@ -1880,6 +1881,8 @@ cssToClip.gatherLayerCSS = function()
 	var isCSSid = (curLayer.name[0] == '#'); // Flag if generating ID not class
 	var layerName = this.layerNameToCSS( curLayer.name );
 
+	// this.addText('<div class="' + layerName + '"></div>')
+	this.htmlText += ('\t<div class="' + layerName + '"></div>' + "\n");
 	this.addText( (isCSSid ? "#" : ".") + layerName + " {" );
 	this.pushIndent();
 	var boundsInfo = new BoundsParameters();
