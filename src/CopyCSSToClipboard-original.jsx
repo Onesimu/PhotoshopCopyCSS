@@ -126,8 +126,7 @@ DOMunitToCSS[TypeUnits.POINTS]	= "pt";
 // A sample object descriptor path looks like:
 // AGMStrokeStyleInfo.strokeStyleContent.'Clr '.'Rd  '
 // This converts either OSType or string IDs.
-makeID = function( keyStr )
-{
+makeID = function( keyStr ) {
 	if (keyStr[0] == "'")	// Keys with single quotes 'ABCD' are charIDs.
 		return app.charIDToTypeID( eval(keyStr) );
 	else
@@ -141,8 +140,7 @@ function round1k( x ) { return Math.round( x * 1000 ) / 1000; }
 function stripUnits( x ) { return Number( x.replace(/[^0-9.-]+/g, "") ); }
 
 // Convert a "3.0pt" style string or number to a DOM UnitValue
-function makeUnitVal( v )
-{
+function makeUnitVal( v ) {
 	if (typeof v == "string")
 		return UnitValue( stripUnits( v ), v.replace(/[0-9.-]+/g, "" ) );
 	if (typeof v == "number")
@@ -150,12 +148,10 @@ function makeUnitVal( v )
 }
 
 // Convert a pixel measurement into a UnitValue in rulerUnits
-function pixelsToAppUnits( v )
-{
+function pixelsToAppUnits( v ) {
 	if (app.preferences.rulerUnits == Units.PIXELS)
 		return UnitValue( v, "px" );
-	else
-	{
+	else {
 		// Divide by doc's DPI, convert to inch, then convert to ruler units.
 		var appUnits = DOMunitToCSS[app.preferences.rulerUnits];
 		return UnitValue( (UnitValue( v / app.activeDocument.resolution, "in" )).as(appUnits), appUnits );
@@ -163,15 +159,13 @@ function pixelsToAppUnits( v )
 }
 
 // Format a DOM UnitValue as a CSS string, using the rulerUnits units.
-UnitValue.prototype.asCSS = function()
-{
+UnitValue.prototype.asCSS = function() {
 	var cssUnits = DOMunitToCSS[app.preferences.rulerUnits];
 	return round1k( this.as(cssUnits) ) + cssUnits;
 }
 
 // Return the absolute value of a UnitValue as a UnitValue
-UnitValue.prototype.abs = function()
-{
+UnitValue.prototype.abs = function() {
 	return UnitValue( Math.abs( this.value ), this.type );
 }
 
@@ -180,8 +174,7 @@ UnitValue.prototype.abs = function()
 // This normalizes the unit output to the ruler setting, for consistency in CSS.
 // Note: This isn't a method because "desc" can either be an ActionDescriptor
 // or an ActionList (in which case the "ID" is the index).
-function getPSUnitValue( desc, ID )
-{
+function getPSUnitValue( desc, ID ) {
 	var srcUnitsID = desc.getUnitDoubleType( ID );
 
 	if (srcUnitsID == unitNone)	// Um, unitless unitvalues are just...numbers.
@@ -221,11 +214,9 @@ function getPSUnitValue( desc, ID )
 // Note the dump method compresses this to the text "{ channel: 1 }", but internally
 // the form above is used.  This is because ExtendScript doesn't have a good method
 // for enumerating keys.
-function getReference( ref )
-{
+function getReference( ref ) {
 	var v;
-	switch (ref.getForm())
-	{
+	switch (ref.getForm()) {
 		case ReferenceFormType.CLASSTYPE:	v = typeIDToStringID( ref.getDesiredClass() ); break;
 		case ReferenceFormType.ENUMERATED:	v = ref.getEnumeratedValue(); break;
 		case ReferenceFormType.IDENTIFIER:		v = ref.getIdentifier(); break;
@@ -244,10 +235,8 @@ function getReference( ref )
 // you'll need to strip off the type and convert it to Number()
 // Note: This isn't a method because "desc" can either be an ActionDescriptor
 // or an ActionList (in which case the "ID" is the index).
-function getFlatType( desc, ID )
-{
-	switch (desc.getType( ID ))
-	{
+function getFlatType( desc, ID ) {
+	switch (desc.getType( ID )) {
 		case DescValueType.BOOLEANTYPE:	return desc.getBoolean( ID );
 		case DescValueType.STRINGTYPE:		return desc.getString( ID );
 		case DescValueType.INTEGERTYPE:	return desc.getInteger( ID );
@@ -264,13 +253,11 @@ function getFlatType( desc, ID )
 
 //////////////////////////////////// ActionDescriptor //////////////////////////////////////
 
-ActionDescriptor.prototype.getFlatType = function( ID )
-{
+ActionDescriptor.prototype.getFlatType = function( ID ) {
 	return getFlatType( this, ID );
 }
 
-ActionList.prototype.getFlatType = function( index )
-{
+ActionList.prototype.getFlatType = function( index ) {
 	// Share the ActionDesciptor code via duck typing
 	return getFlatType( this, index );
 }
@@ -284,8 +271,7 @@ ActionList.prototype.getFlatType = function( index )
 //   desc.getObject(s2ID("AGMStrokeStyleInfo"))
 //		.getObject(s2ID("strokeStyleContent)).getObject(c2ID('Clr ')).getDouble('Rd  ');
 //
-ActionDescriptor.prototype.getVal = function( keyList, firstListItemOnly  )
-{
+ActionDescriptor.prototype.getVal = function( keyList, firstListItemOnly  ) {
 	if (typeof(keyList) == 'string')	// Make keyList an array if not already
 		keyList = keyList.split('.');
 
@@ -300,8 +286,7 @@ ActionDescriptor.prototype.getVal = function( keyList, firstListItemOnly  )
 	keyID = makeID(keyStr);
 
 	if (this.hasKey( keyID))
-		switch (this.getType( keyID ))
-		{
+		switch (this.getType( keyID )) {
 			case DescValueType.OBJECTTYPE:
 				return this.getObjectValue( keyID ).getVal( keyList, firstListItemOnly );
 			case DescValueType.LISTTYPE:
@@ -314,8 +299,7 @@ ActionDescriptor.prototype.getVal = function( keyList, firstListItemOnly  )
 }
 
 // Traverse the actionList using the keyList (see below)
-ActionList.prototype.getVal = function( keyList, firstListItemOnly )
-{
+ActionList.prototype.getVal = function( keyList, firstListItemOnly ) {
 	if (typeof(keyList) == 'string')	// Make keyList an array if not already
 		keyList = keyList.split('.');
 
@@ -324,20 +308,17 @@ ActionList.prototype.getVal = function( keyList, firstListItemOnly )
 
 	// Instead of ID, pass list item #.  Duck typing.
 	if (firstListItemOnly)
-		switch (this.getType( 0 ))
-		{
+		switch (this.getType( 0 )) {
 			case DescValueType.OBJECTTYPE:
 				return this.getObjectValue( 0 ).getVal( keyList, firstListItemOnly );
 			case DescValueType.LISTTYPE:
 				return this.getList( 0 ).getVal( keyList, firstListItemOnly );
 			default: return this.getFlatType( 0 );
 		}
-	else
-	{
+	else {
 		var i, result = [];
 		for (i = 0; i < this.count; ++i)
-			switch (this.getType(i))
-			{
+			switch (this.getType(i)) {
 				case DescValueType.OBJECTTYPE:
 					result.push( this.getObjectValue( i ).getVal( keyList, firstListItemOnly  ));
 					break;
@@ -351,14 +332,12 @@ ActionList.prototype.getVal = function( keyList, firstListItemOnly )
 	}
 }
 
-ActionDescriptor.prototype.extractBounds = function()
-{
+ActionDescriptor.prototype.extractBounds = function() {
 	function getbnd(desc, key) { return makeUnitVal( desc.getVal( key ) ); }
 	return [getbnd(this,"left"), getbnd(this,"top"), getbnd(this,"right"), getbnd(this,"bottom")];
 }
 
-ActionDescriptor.dumpValue = function( flatValue )
-{
+ActionDescriptor.dumpValue = function( flatValue ) {
 	if ((typeof flatValue == "object") && (typeof flatValue.refclass == "string"))
 		return "{ " + flatValue.refclass + ": " + flatValue.value + " }";
 	else
@@ -368,20 +347,17 @@ ActionDescriptor.dumpValue = function( flatValue )
 // Debugging - recursively walk a descriptor and dump out all of the keys
 // Note we only dump stringIDs.  If you look in UActions.cpp:CInitialStringToIDEntry,
 // there is a table converting most (all?) charIDs into stringIDs.
-ActionDescriptor.prototype.dumpDesc = function( keyName )
-{
+ActionDescriptor.prototype.dumpDesc = function( keyName ) {
 	var i;
 	if (typeof( keyName ) == "undefined")
 		keyName = "";
 
-	for (i = 0; i < this.count; ++i)
-	{
+	for (i = 0; i < this.count; ++i) {
 		try {
 			var key = this.getKey(i);
 			var ref;
 			var thisKey = keyName + "." + app.typeIDToStringID( key ) ;
-			switch (this.getType( key ))
-			{
+			switch (this.getType( key )) {
 				case DescValueType.OBJECTTYPE:
 					this.getObjectValue( key ).dumpDesc( thisKey );
 					break;
@@ -405,8 +381,7 @@ ActionDescriptor.prototype.dumpDesc = function( keyName )
 	}
 }
 
-ActionList.prototype.dumpDesc = function( keyName )
-{
+ActionList.prototype.dumpDesc = function( keyName ) {
 	var i;
 	if (typeof( keyName ) == "undefined")
 		keyName = "";
@@ -414,8 +389,7 @@ ActionList.prototype.dumpDesc = function( keyName )
 	if (this.count == 0)
 		$.writeln( keyName + " <empty list>" );
 	else
-		for (i = 0; i < this.count; ++i)
-		{
+		for (i = 0; i < this.count; ++i) {
 			try {
 				if (this.getType(i) == DescValueType.OBJECTTYPE)
 					this.getObjectValue(i).dumpDesc( keyName + "[" + i + "]" );
@@ -426,8 +400,7 @@ ActionList.prototype.dumpDesc = function( keyName )
 					$.writeln( keyName + "[" + i + "]:"
 						+ ActionDescriptor.dumpValue( this.getFlatType( i ) ) );
 			}
-			catch (err)
-			{
+			catch (err) {
 				$.writeln("Error "+keyName+"["+i+"]: " + err.message);
 			}
 		}
@@ -439,8 +412,7 @@ ActionList.prototype.dumpDesc = function( keyName )
 // track of the total steps and number of steps completed so task steps can simply call
 // nextProgress().
 
-function ProgressBar()
-{
+function ProgressBar() {
 	this.totalProgressSteps = 0;
 	this.currentProgress = 0;
 }
@@ -448,8 +420,7 @@ function ProgressBar()
 // You must set cssToClip.totalProgressSteps to the total number of
 // steps to complete before calling this or nextProgress().
 // Returns true if aborted.
-ProgressBar.prototype.updateProgress = function( done )
-{
+ProgressBar.prototype.updateProgress = function( done ) {
 	if (this.totalProgressSteps == 0)
 		return false;
 
@@ -457,8 +428,7 @@ ProgressBar.prototype.updateProgress = function( done )
 }
 
 // Returns true if aborted.
-ProgressBar.prototype.nextProgress = function()
-{
+ProgressBar.prototype.nextProgress = function() {
 	this.currentProgress++;
 	return this.updateProgress( this.currentProgress );
 }
@@ -469,19 +439,16 @@ ProgressBar.prototype.nextProgress = function()
 // really high if you need to switch the active layer.  This class provides
 // a cache and accessor functions for layers bypassing the DOM.
 
-function PSLayerInfo( layerIndex, isBG )
-{
+function PSLayerInfo( layerIndex, isBG ) {
 	this.index = layerIndex;
 	this.boundsCache = null;
 	this.descCache = {};
 
-	if (isBG)
-	{
+	if (isBG) {
 		this.layerID = "BG";
 		this.layerKind = kBackgroundSheet;
 	}
-	else
-	{
+	else {
 		// See TLayerElement::Make() to learn how layers are located by PS events.
 		var ref = new ActionReference();
 		ref.putProperty( classProperty, keyLayerID );
@@ -492,16 +459,14 @@ function PSLayerInfo( layerIndex, isBG )
 	}
 }
 
-PSLayerInfo.layerIDToIndex = function( layerID )
-{
+PSLayerInfo.layerIDToIndex = function( layerID ) {
 	var ref = new ActionReference();
 	ref.putProperty( classProperty, keyItemIndex );
 	ref.putIdentifier( classLayer, layerID );
 	return executeActionGet( ref ).getVal("itemIndex");
 }
 
-PSLayerInfo.prototype.makeLayerActive = function()
-{
+PSLayerInfo.prototype.makeLayerActive = function() {
 	var desc = new ActionDescriptor();
 	var ref = new ActionReference();
 	ref.putIdentifier( classLayer, this.layerID );
@@ -509,16 +474,13 @@ PSLayerInfo.prototype.makeLayerActive = function()
 	executeAction( eventSelect, desc, DialogModes.NO );
 }
 
-PSLayerInfo.prototype.getLayerAttr = function( keyString, layerDesc )
-{
+PSLayerInfo.prototype.getLayerAttr = function( keyString, layerDesc ) {
 	var layerDesc;
 	var keyList = keyString.split('.');
 
-	if ((typeof(layerDesc) == "undefined") || (layerDesc == null))
-	{
+	if ((typeof(layerDesc) == "undefined") || (layerDesc == null)) {
 		// Cache the IDs, because some (e.g., Text) take a while to get.
-		if (typeof this.descCache[keyList[0]] == "undefined")
-		{
+		if (typeof this.descCache[keyList[0]] == "undefined") {
 			var ref = new ActionReference();
 			ref.putProperty( classProperty, makeID(keyList[0]));
 			ref.putIndex( classLayer, this.index );
@@ -532,15 +494,13 @@ PSLayerInfo.prototype.getLayerAttr = function( keyString, layerDesc )
 	return layerDesc.getVal( keyList );
 }
 
-PSLayerInfo.prototype.getBounds = function( ignoreEffects )
-{
+PSLayerInfo.prototype.getBounds = function( ignoreEffects ) {
 	var boundsDesc;
 	if (typeof ignoreEffects == "undefined")
 		ignoreEffects = false;
 	if (ignoreEffects)
 		boundsDesc = this.getLayerAttr("boundsNoEffects");
-	else
-	{
+	else {
 		if (this.boundsCache)
 			return this.boundsCache;
 		boundsDesc = this.getLayerAttr("bounds");
@@ -558,8 +518,7 @@ PSLayerInfo.prototype.getBounds = function( ignoreEffects )
 }
 
 // Get a list of descriptors.  Returns NULL if one of them is unavailable.
-PSLayerInfo.prototype.getLayerAttrList = function( keyString )
-{
+PSLayerInfo.prototype.getLayerAttrList = function( keyString ) {
 	var i, keyList = keyString.split('.');
 	var descList = [];
 	// First item from the layer
@@ -570,8 +529,7 @@ PSLayerInfo.prototype.getLayerAttrList = function( keyString )
 	if (keyList.length == 1)
 		return descList;
 
-	for (i = 1; i < keyList.length; ++i)
-	{
+	for (i = 1; i < keyList.length; ++i) {
 		desc =  descList[i-1].getVal( keyList[i] );
 		if (desc == null) return null;
 		descList.push( desc );
@@ -579,8 +537,7 @@ PSLayerInfo.prototype.getLayerAttrList = function( keyString )
 	return descList;
 }
 
-PSLayerInfo.prototype.descToColorList = function( colorDesc, colorPath )
-{
+PSLayerInfo.prototype.descToColorList = function( colorDesc, colorPath ) {
 	function roundColor( x ) { x = Math.round(x); return (x > 255) ? 255 : x; }
 
 	var i, rgb = ["'Rd  '", "'Grn '","'Bl  '"];	// Note double quotes around single quotes
@@ -596,16 +553,14 @@ PSLayerInfo.prototype.descToColorList = function( colorDesc, colorPath )
 }
 
 // If the desc has a 'Clr ' object, create CSS "rgb( rrr, ggg, bbb )" output from it.
-PSLayerInfo.prototype.descToCSSColor = function( colorDesc, colorPath )
-{
+PSLayerInfo.prototype.descToCSSColor = function( colorDesc, colorPath ) {
 	var rgbTxt = this.descToColorList( colorDesc, colorPath );
 	if (! rgbTxt)
 		return null;
 	return "rgb(" + rgbTxt.join(", ") + ")";
 }
 
-PSLayerInfo.prototype.descToRGBAColor = function( colorPath, opacity, colorDesc )
-{
+PSLayerInfo.prototype.descToRGBAColor = function( colorPath, opacity, colorDesc ) {
 	var rgbTxt = this.descToColorList( colorDesc, colorPath );
 	rgbTxt = rgbTxt ? rgbTxt : ["0","0","0"];
 
@@ -618,15 +573,13 @@ PSLayerInfo.prototype.descToRGBAColor = function( colorPath, opacity, colorDesc 
 		return "rgba(" + rgbTxt.join( ", ") + ", " + round1k( opacity ) + ")";
 }
 
-function DropShadowInfo( xoff, yoff, dsDesc )
-{
+function DropShadowInfo( xoff, yoff, dsDesc ) {
 	this.xoff = xoff;
 	this.yoff = yoff;
 	this.dsDesc = dsDesc;
 }
 
-PSLayerInfo.getEffectOffset = function( fxDesc )
-{
+PSLayerInfo.getEffectOffset = function( fxDesc ) {
 	var xoff, yoff, angle;
 
 	// Assumes degrees, PS users aren't into radians.
@@ -643,8 +596,7 @@ PSLayerInfo.getEffectOffset = function( fxDesc )
 }
 
 // New lfx: dropShadowMulti, frameFXMulti, gradientFillMulti, innerShadowMulti, solidFillMulti,
-PSLayerInfo.prototype.getDropShadowInfo = function( shadowType, boundsInfo, psEffect )
-{
+PSLayerInfo.prototype.getDropShadowInfo = function( shadowType, boundsInfo, psEffect ) {
 	psEffect = (typeof psEffect == "undefined") ? "dropShadow" : psEffect;
 	var lfxDesc = this.getLayerAttr( "layerEffects");
 	var dsDesc = lfxDesc ? lfxDesc.getVal( psEffect ) : null;
@@ -659,27 +611,22 @@ PSLayerInfo.prototype.getDropShadowInfo = function( shadowType, boundsInfo, psEf
 	// If any of the other (non-drop-shadow) layer effects are on, then
 	// flag this so we use the proper bounds calculation.
 	if ((typeof shadowType != "undefined") && (typeof boundsInfo != "undefined")
-		&& (shadowType == "box-shadow") && lfxDesc && lfxOn && !dsDescList)
-	{
+		&& (shadowType == "box-shadow") && lfxDesc && lfxOn && !dsDescList) {
 		var i, fxList = ["dropShadow", "innerShadow", "outerGlow", "innerGlow",
 			"bevelEmboss", "chromeFX", "solidFill", "gradientFill"];
 		for (i in fxList)
-			if (lfxDesc.getVal( fxList[i] + ".enabled"))
-			{
+			if (lfxDesc.getVal( fxList[i] + ".enabled")) {
 				boundsInfo.hasLayerEffect = true;
 				break;
 			}
 		// Search multis as well
-		if (! boundsInfo.hasLayerEffect)
-		{
+		if (! boundsInfo.hasLayerEffect) {
 			var fxMultiList = ["dropShadowMulti", "frameFXMulti", "gradientFillMulti",
 				"innerShadowMulti", "solidFillMulti"];
-			for (i in fxMultiList)
-			{
+			for (i in fxMultiList) {
 				var j, fxs = lfxDesc.getVal( fxMultiList[i] );
 				for (j = 0; j < fxs.length; ++j)
-					if (fxs[j].getVal("enabled"))
-					{
+					if (fxs[j].getVal("enabled")) {
 						boundsInfo.hasLayerEffect = true;
 						break;
 					}
@@ -694,8 +641,7 @@ PSLayerInfo.prototype.getDropShadowInfo = function( shadowType, boundsInfo, psEf
 
 	var i, dropShadows = [];
 	for (i = 0; i < dsDescList.length; ++i)
-		if (dsDescList[i].getVal("enabled"))
-		{
+		if (dsDescList[i].getVal("enabled")) {
 			var offset = PSLayerInfo.getEffectOffset( dsDescList[i] );
 			dropShadows.push( new DropShadowInfo( offset[0], offset[1], dsDescList[i] ) );
 		}
@@ -710,22 +656,19 @@ PSLayerInfo.prototype.getDropShadowInfo = function( shadowType, boundsInfo, psEf
 // puts the stroke width into the output.  If the descriptor isn't
 // found, no output is generated.
 //
-PSLayerInfo.prototype.replaceDescKey = function( cssText, baseDesc )
-{
+PSLayerInfo.prototype.replaceDescKey = function( cssText, baseDesc ) {
 	// Locate any $parameters$ to be substituted.
 	var i, subs = cssText.match(/[$]([^$]+)[$]/g);
 	var replacementFailed = false;
 
-	function testAndReplace( item )
-	{
+	function testAndReplace( item ) {
 		if (item != null)
 			cssText = cssText.replace(/[$]([^$]+)[$]/, item );
 		else
 			replacementFailed = true;
 	}
 
-	if (subs)
-	{
+	if (subs) {
 		// Stupid JS regex leaves whole match in capture group!
 		for (i = 0; i < subs.length; ++i)
 			subs[i] = subs[i].split("$")[1];
@@ -735,8 +678,7 @@ PSLayerInfo.prototype.replaceDescKey = function( cssText, baseDesc )
 		if (! subs)
 			alert('Missing substitution text in CSS/SVG spec');
 
-		for (i = 0; i < subs.length; ++i)
-		{
+		for (i = 0; i < subs.length; ++i) {
 			// Handle color as a special case
 			if (subs[i].match(/'Clr '/))
 				testAndReplace( this.descToCSSColor( baseDesc, subs[i] ) );
@@ -750,25 +692,21 @@ PSLayerInfo.prototype.replaceDescKey = function( cssText, baseDesc )
 }
 
 // If useLayerFX is false, then don't check it.  By default it's checked.
-PSLayerInfo.prototype.gradientDesc = function( useLayerFX )
-{
+PSLayerInfo.prototype.gradientDesc = function( useLayerFX ) {
 	if (typeof useLayerFX == "undefined")
 		useLayerFX = true;
 	var descList = this.getLayerAttr( "adjustment" );
-	if (descList && descList.getVal("gradient"))
-	{
+	if (descList && descList.getVal("gradient")) {
 		return descList;
 	}
-	else		// If there's no adjustment layer, see if we have one from layerFX...
-	{
+	else		// If there's no adjustment layer, see if we have one from layerFX... {
 		if (useLayerFX)
 			descList = this.getLayerAttr( "layerEffects.gradientFill" );
 	}
 	return descList;
 }
 
-function GradientInfo( gradDesc )
-{
+function GradientInfo( gradDesc ) {
 	this.angle = gradDesc.getVal("angle");
 	this.opacity = gradDesc.getVal("opacity");
 	this.opacity = this.opacity ? stripUnits(this.opacity)/100.0 : 1;
@@ -783,15 +721,13 @@ function GradientInfo( gradDesc )
 }
 
 // Extendscript operator overloading
-GradientInfo.prototype["=="] = function( src )
-{
+GradientInfo.prototype["=="] = function( src ) {
 	return (this.angle === src.angle)
 		&& (this.type === src.type)
 		&& (this.reverse === src.reverse);
 }
 
-PSLayerInfo.prototype.gradientInfo = function( useLayerFX )
-{
+PSLayerInfo.prototype.gradientInfo = function( useLayerFX ) {
 	var gradDesc = this.gradientDesc( useLayerFX );
 	// Make sure null is returned if we aren't using layerFX and there's no adj layer
 	if (! useLayerFX && gradDesc && !gradDesc.getVal("gradient"))
@@ -800,15 +736,12 @@ PSLayerInfo.prototype.gradientInfo = function( useLayerFX )
 }
 
 // Gradient stop object, made from PS gradient.colors/gradient.transparency descriptor
-function GradientStop( desc, maxVal )
-{
+function GradientStop( desc, maxVal ) {
 	this.r = 0; this.g = 0; this.b = 0; this.m = 100;
 	this.location  = 0; this.midPoint = 50;
-	if (typeof desc != "undefined")
-	{
+	if (typeof desc != "undefined") {
 		var colorDesc = desc.getVal("color");
-		if (colorDesc)
-		{
+		if (colorDesc) {
 			this.r = Math.round(colorDesc.getVal("red"));
 			this.g = Math.round(colorDesc.getVal("green"));
 			this.b = Math.round(colorDesc.getVal("blue"));
@@ -820,8 +753,7 @@ function GradientStop( desc, maxVal )
 	}
 }
 
-GradientStop.prototype.copy = function( matte, location )
-{
+GradientStop.prototype.copy = function( matte, location ) {
 	var result = new GradientStop();
 	result.r = this.r;
 	result.g = this.g;
@@ -832,8 +764,7 @@ GradientStop.prototype.copy = function( matte, location )
 	return result;
 }
 
-GradientStop.prototype["=="] = function( src )
-{
+GradientStop.prototype["=="] = function( src ) {
 	return (this.r === src.r) && (this.g === src.g)
 		&& (this.b === src.b) && (this.m === src.m)
 		&& (this.location === src.location)
@@ -841,11 +772,9 @@ GradientStop.prototype["=="] = function( src )
 }
 
 // Lerp ("linear interpolate")
-GradientStop.lerp = function(t, a, b)
-{ return Math.round(t * (b - a) + a); }  // Same as (1-t)*a + t*b
+GradientStop.lerp = function(t, a, b) { return Math.round(t * (b - a) + a); }  // Same as (1-t)*a + t*b
 
-GradientStop.prototype.interpolate = function( dest, t1 )
-{
+GradientStop.prototype.interpolate = function( dest, t1 ) {
 	var result = new GradientStop();
 	result.r = GradientStop.lerp( t1, this.r, dest.r );
 	result.g = GradientStop.lerp( t1, this.g, dest.g );
@@ -854,8 +783,7 @@ GradientStop.prototype.interpolate = function( dest, t1 )
 	return result;
 }
 
-GradientStop.prototype.colorString = function( noTransparency )
-{
+GradientStop.prototype.colorString = function( noTransparency ) {
 	if (typeof noTransparency == "undefined")
 		noTransparency = false;
 	var compList = (noTransparency || (this.m == 100))
@@ -865,13 +793,11 @@ GradientStop.prototype.colorString = function( noTransparency )
 	return tag + compList.join(",") + ")";
 }
 
-GradientStop.prototype.toString = function()
-{
+GradientStop.prototype.toString = function() {
 	return this.colorString() + " " + Math.round(this.location) + "%";
 }
 
-GradientStop.reverseStoplist = function( stopList )
-{
+GradientStop.reverseStoplist = function( stopList ) {
 	stopList.reverse();
 	// Fix locations to ascending order
 	for (var s in stopList)
@@ -879,27 +805,22 @@ GradientStop.reverseStoplist = function( stopList )
 	return stopList;
 }
 
-GradientStop.dumpStops = function( stopList )
-{
+GradientStop.dumpStops = function( stopList ) {
 	for (var i in stopList)
 		$.writeln( stopList[i] );
 }
 
 // Gradient format: linear-gradient( <angle>, rgb( rr, gg, bb ) xx%, rgb( rr, gg, bb ), yy%, ... );
-PSLayerInfo.prototype.gradientColorStops = function()
-{
+PSLayerInfo.prototype.gradientColorStops = function() {
 	// Create local representation of PS stops
-	function makeStopList( descList, maxVal )
-	{
+	function makeStopList( descList, maxVal ) {
 		var s, stopList = [];
 		for (s in descList)
 			stopList.push( new GradientStop( descList[s], maxVal ) );
 
 		// Replace Photoshop "midpoints" with complete new stops
-		for (s = 1; s < stopList.length; ++s)
-		{
-			if (stopList[s].midPoint != 50)
-			{
+		for (s = 1; s < stopList.length; ++s) {
+			if (stopList[s].midPoint != 50) {
 				var newStop = stopList[s-1].interpolate( stopList[s], 0.5 );
 				newStop.location = GradientStop.lerp( stopList[s].midPoint/100.0,
 					stopList[s-1].location,
@@ -913,8 +834,7 @@ PSLayerInfo.prototype.gradientColorStops = function()
 
 	var gdesc = this.gradientDesc();
 	var psGrad = gdesc ? gdesc.getVal("gradient") : null;
-	if (psGrad)
-	{
+	if (psGrad) {
 //		var maxVal = psGrad.getVal( "interpolation" );	// I swear it used to find this.
 		var maxVal = 4096;
 
@@ -927,12 +847,10 @@ PSLayerInfo.prototype.gradientColorStops = function()
 			if (! matteActive)
 				matteActive = (matteStops[m].m != 100);
 
-		if (matteActive)
-		{
+		if (matteActive) {
 			// First, copy matte values from matching matte stops to the color stops
 			c = 0;
-			for (m in matteStops)
-			{
+			for (m in matteStops) {
 				while ((c < colorStops.length) && (colorStops[c].location < matteStops[m].location))
 					c++;
 				if ((c < colorStops.length) && (colorStops[c].location == matteStops[m].location))
@@ -945,27 +863,22 @@ PSLayerInfo.prototype.gradientColorStops = function()
 
 			// Now weave the lists together
 			m = 0; c = 0;
-			while (c < colorStops.length)
-			{
+			while (c < colorStops.length) {
 				// Must adjust color stop's matte to interpolate matteStops
-				if (colorStops[c].location < matteStops[m].location)
-				{
+				if (colorStops[c].location < matteStops[m].location) {
 					var t = (colorStops[c].location - matteStops[m-1].location)
 						/ (matteStops[m].location - matteStops[m-1].location);
 					colorStops[c].m = GradientStop.lerp( t, matteStops[m-1].m, matteStops[m].m );
 					c++;
 				}
 				// Must add matte stop to color stop list
-				if (matteStops[m].location < colorStops[c].location)
-				{
+				if (matteStops[m].location < colorStops[c].location) {
 					var t, newStop;
 					// If matte stops exist in front of the 1st color stop
-					if (c < 1)
-					{
+					if (c < 1) {
 						newStop = colorStops[0].copy( matteStops[m].m, matteStops[m].location );
 					}
-					else
-					{
+					else {
 						t = (matteStops[m].location - colorStops[c-1].location)
 							/ (colorStops[c].location - colorStops[c-1].location);
 						newStop = colorStops[c-1].interpolate( colorStops[c], t );
@@ -977,14 +890,12 @@ PSLayerInfo.prototype.gradientColorStops = function()
 					c++;	// Step past newly added color stop
 				}
 				// Same, was fixed above
-				if (matteStops[m].location == colorStops[c].location)
-				{
+				if (matteStops[m].location == colorStops[c].location) {
 					m++; c++;
 				}
 			}
 			// If any matte stops remain, add those too.
-			while (m < matteStops.length)
-			{
+			while (m < matteStops.length) {
 				var newStop = colorStops[c-1].copy( matteStops[m].m, matteStops[m].location );
 				colorStops.push( newStop );
 				m++;
@@ -1000,15 +911,13 @@ PSLayerInfo.prototype.gradientColorStops = function()
 //////////////////////////////////// CSSToClipboard //////////////////////////////////////
 
 // Base object to scope the rest of the functions in.
-function CSSToClipboard()
-{
+function CSSToClipboard() {
 	// Constructor moved to reset(), so it can be called via a script.
 }
 
 cssToClip = new CSSToClipboard();
 
-cssToClip.reset = function()
-{
+cssToClip.reset = function() {
 	this.pluginName = "CSSToClipboard";
 	this.cssText = "";
 	this.htmlText = "";
@@ -1032,34 +941,29 @@ cssToClip.reset = function()
 		if (app.activeDocument.backgroundLayer)
 			this.documentIndexOffset = 1;
 	}
-	catch (err)
-	{}
+	catch (err) {}
 }
 
 cssToClip.reset();
 
 // Call Photoshop to copy text to the system clipboard
-cssToClip.copyTextToClipboard = function( txt )
-{
+cssToClip.copyTextToClipboard = function( txt ) {
 	var testStrDesc = new ActionDescriptor();
 
 	testStrDesc.putString( keyTextData, txt );
 	executeAction( ktextToClipboardStr, testStrDesc, DialogModes.NO );
 }
 
-cssToClip.copyCSSToClipboard = function()
-{
+cssToClip.copyCSSToClipboard = function() {
 	this.logToHeadlights("Copy to CSS invoked");
 	this.copyTextToClipboard( '<div>\n' + this.htmlText + '</div>\n' + '\n<style>\n' + this.cssText + '</style>\n');
 }
 
-cssToClip.isCSSLayerKind = function( layerKind )
-{
+cssToClip.isCSSLayerKind = function( layerKind ) {
 	if (typeof layerKind == "undefined")
 		layerKind = this.currentPSLayerInfo.layerKind;
 
-	switch (layerKind)
-	{
+	switch (layerKind) {
 		case kVectorSheet:	return true;
 		case kTextSheet:		return true;
 		case kPixelSheet:		return true;
@@ -1073,32 +977,26 @@ cssToClip.isCSSLayerKind = function( layerKind )
 // it uses *zero* based indexing.  The DOM should probably stick to the zero-based
 // index, so the adjustment is made here.
 // Oh god, it gets worse...the indexing is zero based if there's no background layer.
-cssToClip.setCurrentLayer = function( layer )
-{
+cssToClip.setCurrentLayer = function( layer ) {
 	this.currentLayer = layer;
 	this.currentPSLayerInfo = new PSLayerInfo(layer.itemIndex - this.documentIndexOffset, layer.isBackgroundLayer);
 }
 
-cssToClip.getCurrentLayer = function()
-{
+cssToClip.getCurrentLayer = function() {
 	if (! this.currentLayer)
 		this.setCurrentLayer( app.activeDocument.activeLayer );
 	return this.currentLayer;
 }
 
 // These shims connect the original cssToClip with the new PSLayerInfo object.
-cssToClip.getLayerAttr = function( keyString, layerDesc )
-{ return this.currentPSLayerInfo.getLayerAttr( keyString, layerDesc ); }
+cssToClip.getLayerAttr = function( keyString, layerDesc ) { return this.currentPSLayerInfo.getLayerAttr( keyString, layerDesc ); }
 
-cssToClip.getLayerBounds = function( ignoreEffects )
-{ return this.currentPSLayerInfo.getBounds( ignoreEffects ); }
+cssToClip.getLayerBounds = function( ignoreEffects ) { return this.currentPSLayerInfo.getBounds( ignoreEffects ); }
 
-cssToClip.descToCSSColor = function( colorDesc, colorPath )
-{ return this.currentPSLayerInfo.descToCSSColor( colorDesc, colorPath ); }
+cssToClip.descToCSSColor = function( colorDesc, colorPath ) { return this.currentPSLayerInfo.descToCSSColor( colorDesc, colorPath ); }
 
 // Like getLayerAttr, but returns an app attribute.  No caching.
-cssToClip.getPSAttr = function( keyStr, objectClass )
-{
+cssToClip.getPSAttr = function( keyStr, objectClass ) {
 	var keyList = keyStr.split('.');
 	var ref = new ActionReference();
 	ref.putProperty( classProperty, makeID( keyList[0] ) );
@@ -1109,32 +1007,26 @@ cssToClip.getPSAttr = function( keyStr, objectClass )
 	return resultDesc.getVal( keyList );
 }
 
-cssToClip.getAppAttr = function( keyStr )
-{ return this.getPSAttr( keyStr, classApplication ); }
+cssToClip.getAppAttr = function( keyStr ) { return this.getPSAttr( keyStr, classApplication ); }
 
-cssToClip.getDocAttr = function( keyStr )
-{ return this.getPSAttr( keyStr, classDocument ); }
+cssToClip.getDocAttr = function( keyStr ) { return this.getPSAttr( keyStr, classDocument ); }
 
-cssToClip.pushIndent = function()
-{
+cssToClip.pushIndent = function() {
 	this.indentSpaces += "  ";
 }
 
-cssToClip.popIndent = function()
-{
+cssToClip.popIndent = function() {
 	if (this.indentSpaces.length < 2)
 		alert("Error - indent underflow");
 	this.indentSpaces = this.indentSpaces.slice(0,-2);
 }
 
-cssToClip.addText = function( text )
-{
+cssToClip.addText = function( text ) {
 		this.cssText += (this.indentSpaces + text + "\n");
 //	$.writeln(text);	// debug
 }
 
-cssToClip.addStyleLine = function( cssText, baseDesc, browserTagList )
-{
+cssToClip.addStyleLine = function( cssText, baseDesc, browserTagList ) {
 	var result = this.currentPSLayerInfo.replaceDescKey( cssText, baseDesc );
 	var replacementFailed = result[0];
 	cssText = result[1];
@@ -1146,8 +1038,7 @@ cssToClip.addStyleLine = function( cssText, baseDesc, browserTagList )
 }
 
 // Text items need to try both the base and the default descriptors
-cssToClip.addStyleLine2 = function( cssText, baseDesc, backupDesc )
-{
+cssToClip.addStyleLine2 = function( cssText, baseDesc, backupDesc ) {
 	if (! this.addStyleLine( cssText, baseDesc ) && backupDesc)
 		this.addStyleLine( cssText, backupDesc );
 }
@@ -1155,8 +1046,7 @@ cssToClip.addStyleLine2 = function( cssText, baseDesc, backupDesc )
 // Text is handled as a special case, to take care of rounding issues.
 // In particular, we're avoiding 30.011 and 29.942, which round1k would miss
 // Seriously fractional text sizes (as specified by "roundMargin") are left as-is
-cssToClip.addTextSize = function( baseDesc, backupDesc )
-{
+cssToClip.addTextSize = function( baseDesc, backupDesc ) {
 	var roundMargin = 0.2;  // Values outside of this are left un-rounded
 	var sizeText = this.getLayerAttr("size", baseDesc );
 	if (! sizeText)
@@ -1182,23 +1072,19 @@ cssToClip.addTextSize = function( baseDesc, backupDesc )
 // NOTE2: The path for a shape is ONLY visible when that shape is the active
 // layer.  So you must set the shape in question to be the active layer before
 // calling this function.  This really slows down the script, unfortunately.
-cssToClip.extractShapeGeometry = function()
-{
+cssToClip.extractShapeGeometry = function() {
 	// We accept a shape as conforming if the coords are within "magnitude"
 	// of the overall size.
-	function near(a,b, magnitude)
-	{
+	function near(a,b, magnitude) {
 		a = Math.abs(a);  b = Math.abs(b);
 		return Math.abs(a-b) < (Math.max(a,b)/magnitude);
 	}
-	function sameCoord( pathPt, xy )
-	{
+	function sameCoord( pathPt, xy ) {
 		return (pathPt.rightDirection[xy] == pathPt.anchor[xy])
 			&& (pathPt.leftDirection[xy] == pathPt.anchor[xy]);
 	}
 
-	function dumpPts( pts )	// For debug viewing in Matlab
-	{
+	function dumpPts( pts )	// For debug viewing in Matlab {
 		function pt2str( pt ) { return "[" + Math.floor(pt[0]) + ", " + Math.floor(pt[1]) + "]"; }
 		var i;
 		for (i = 0; i < pts.length; ++i)
@@ -1217,18 +1103,15 @@ cssToClip.extractShapeGeometry = function()
 	var path = app.activeDocument.pathItems[pathName.replace(/[^]0/,app.activeDocument.activeLayer.name)];
 
 	// If we have a plausible path, walk the geometry and see if it matches a shape we know about.
-	if ((path.kind == PathKind.VECTORMASK) && (path.subPathItems.length == 1))
-	{
+	if ((path.kind == PathKind.VECTORMASK) && (path.subPathItems.length == 1)) {
 		var subPath = path.subPathItems[0];
-		if (subPath.closed && (subPath.pathPoints.length == 4))	// Ellipse?
-		{
+		if (subPath.closed && (subPath.pathPoints.length == 4))	// Ellipse? {
 			function next(index) { return (index + 1) % 4; }
 			function prev(index) { return (index > 0) ? (index-1) : 3; }
 			var pts = subPath.pathPoints;
 
 			// dumpPts( pts );
-			for (i = 0; i < 4; ++i)
-			{
+			for (i = 0; i < 4; ++i) {
 				var xy = i % 2;	// 0 = x, 1 = y, alternates as we traverse the oval sides
 				if (! sameCoord( pts[i], 1-xy )) return null;
 				if (! near( pts[i].leftDirection[xy] - pts[i].anchor[xy],
@@ -1239,12 +1122,10 @@ cssToClip.extractShapeGeometry = function()
 			// Return the X,Y radius
 			return [pts[1].anchor[0] - pts[0].anchor[0], pts[1].anchor[1] - pts[0].anchor[1], "ellipse"];
 		}
-		else if (subPath.closed && (subPath.pathPoints.length == 8))	// RoundRect?
-		{
+		else if (subPath.closed && (subPath.pathPoints.length == 8))	// RoundRect? {
 			var pts = subPath.pathPoints;
 			//dumpPts( pts );
-			function sameCoord2( pt, xy, io )
-			{
+			function sameCoord2( pt, xy, io ) {
 				return (sameCoord( pt, xy )
 					&& ( ((io == 0) && (pt.rightDirection[1-xy] == pt.anchor[1-xy]))
 						|| ((io == 1) && (pt.leftDirection[1-xy] == pt.anchor[1-xy])) ) );
@@ -1253,19 +1134,16 @@ cssToClip.extractShapeGeometry = function()
 			function prev(index) { return (index > 0) ? (index-1) : 7; }
 			function arm( pt, xy, io ) { return (io == 0) ? pt.rightDirection[xy] : pt.leftDirection[xy]; }
 
-			for (i = 0; i < 8; ++i)
-			{
+			for (i = 0; i < 8; ++i) {
 				var io = i % 2;			// Incoming / Outgoing vector on the anchor point
 				var hv = (i >> 1) % 2;	// Horizontal / Vertical side of the round rect
 				if (! sameCoord2( pts[i], 1-hv, 1-io )) return null;
-				if (io == 0)
-				{
+				if (io == 0) {
 					if( ! near( arm( pts[i], hv, io ) - pts[i].anchor[hv],
 						(pts[prev(i)].anchor[hv] - pts[i].anchor[hv])*kEllipseDist, 10 ) )
 						return null;
 				}
-				else
-				{
+				else {
 					if( ! near( arm( pts[i], hv, io ) - pts[i].anchor[hv],
 						(pts[next(i)].anchor[hv] - pts[i].anchor[hv])*kEllipseDist, 10 ) )
 						return null;
@@ -1277,13 +1155,11 @@ cssToClip.extractShapeGeometry = function()
 }
 
 // Gradient format: linear-gradient( <angle>, rgb( rr, gg, bb ) xx%, rgb( rr, gg, bb ), yy%, ... );
-cssToClip.gradientToCSS = function()
-{
+cssToClip.gradientToCSS = function() {
 	var colorStops = this.currentPSLayerInfo.gradientColorStops();
 	var gradInfo = this.currentPSLayerInfo.gradientInfo();
 
-	if (colorStops && gradInfo)
-	{
+	if (colorStops && gradInfo) {
 		if (gradInfo.reverse)
 			colorStops = GradientStop.reverseStoplist( colorStops );
 
@@ -1299,23 +1175,20 @@ cssToClip.gradientToCSS = function()
 
 // Translate Photoshop drop shadow.  May need work with layerEffects.scale,
 // and need to figure out what's up with the global angle.
-cssToClip.addDropShadow = function( shadowType, boundsInfo )
-{
+cssToClip.addDropShadow = function( shadowType, boundsInfo ) {
 	var dsInfo = this.currentPSLayerInfo.getDropShadowInfo( shadowType, boundsInfo, "dropShadow" );
 	var isInfo = this.currentPSLayerInfo.getDropShadowInfo( shadowType, boundsInfo, "innerShadow" );
 	if (! (dsInfo || isInfo))
 		return;
 
-	function map( lst, fn )
-	{
+	function map( lst, fn ) {
 		var i, result = [];
 		for (i = 0; i < lst.length; ++i)
 			result.push( fn(lst[i] ) );
 		return result;
 	}
 
-	function getShadowCSS( info, skipSpread )
-	{
+	function getShadowCSS( info, skipSpread ) {
 		// Translate PS parameters to CSS style
 		var opacity = info.dsDesc.getVal("opacity");
 		// LFX reports "opacity" as a percentage, so convert it to decimal
@@ -1337,8 +1210,7 @@ cssToClip.addDropShadow = function( shadowType, boundsInfo )
 	function textShadowCSS( info ) { return getShadowCSS( info, true ); }
 
 	// You say CSS was designed by committee?  Really?
-	if (shadowType == "box-shadow")
-	{
+	if (shadowType == "box-shadow") {
 		var i, shadows = [];
 		if (dsInfo)
 			shadows = map( dsInfo, getShadowCSS );
@@ -1357,20 +1229,17 @@ cssToClip.addDropShadow = function( shadowType, boundsInfo )
 	}
 }
 
-cssToClip.addOpacity = function( opacity )
-{
+cssToClip.addOpacity = function( opacity ) {
 	opacity = (typeof opacity == "number") ? opacity : this.getLayerAttr("opacity");
 	if ((typeof opacity == "number") && (opacity < 255))
 		this.addText( "opacity: " + round1k(opacity / 255) + ";" );
 }
 
-cssToClip.addRGBAColor = function( param, opacity, colorDesc )
-{
+cssToClip.addRGBAColor = function( param, opacity, colorDesc ) {
 	this.addText( param + ': ' + this.currentPSLayerInfo.descToRGBAColor( "color", opacity, colorDesc ) +';' );
 }
 
-function BoundsParameters()
-{
+function BoundsParameters() {
 	this.borderWidth = 0;
 	this.textOffset = null;
 	this.hasLayerEffect = false;
@@ -1381,14 +1250,12 @@ function BoundsParameters()
 	this.textLineHeight = 1.2;
 }
 
-cssToClip.addObjectBounds = function( boundsInfo )
-{
+cssToClip.addObjectBounds = function( boundsInfo ) {
 	var curLayer = this.getCurrentLayer();
 
 	var bounds = this.getLayerBounds( boundsInfo.hasLayerEffect );
 
-	if (boundsInfo.rawTextBounds)
-	{
+	if (boundsInfo.rawTextBounds) {
 		// If the text has been transformed, rawTextBounds is set.  We need
 		// to set the CSS bounds to reflect the *un*transformed text, placed about
 		// the center of the transformed text's bounding box.
@@ -1404,18 +1271,15 @@ cssToClip.addObjectBounds = function( boundsInfo )
 
 	if (boundsInfo.textLine
 		&& !boundsInfo.hasLayerEffect
-		&& (boundsInfo.textFontSize !== 0))
-	{
+		&& (boundsInfo.textFontSize !== 0)) {
 		var actualTextPixelHeight = (bounds[3] -bounds[1]).as('px');
 		var textBoxHeight = boundsInfo.textFontSize * boundsInfo.textLineHeight;
 		var correction = (actualTextPixelHeight - textBoxHeight)/2;
 		// If the text doesn't have decenders, then the correction by the PS baseline will
 		// be off (the text is instead centered vertically in the CSS text box).  This applies
 		// a different correciton for this case.
-		if (boundsInfo.textOffset)
-		{
-			if (boundsInfo.textHasDecenders)
-			{
+		if (boundsInfo.textOffset) {
+			if (boundsInfo.textHasDecenders) {
 				var lineHeightCorrection = (boundsInfo.textFontSize - (boundsInfo.textFontSize * boundsInfo.textLineHeight))/2;
 				boundsInfo.textOffset[1] += lineHeightCorrection;
 			}
@@ -1424,14 +1288,12 @@ cssToClip.addObjectBounds = function( boundsInfo )
 		}
 	}
 
-	if ((this.groupLevel == 0) && boundsInfo.textOffset)
-	{
+	if ((this.groupLevel == 0) && boundsInfo.textOffset) {
 		this.addText("position: absolute;" );
 		this.addText("left: " + (bounds[0] + boundsInfo.textOffset[0]).asCSS() +";");
 		this.addText("top: " + (bounds[1] + boundsInfo.textOffset[1]).asCSS() + ";");
 	}
-	else
-	{
+	else {
 		// Go through the DOM to ensure we're working in Pixels
 		var left = bounds[0];
 		var top = bounds[1];
@@ -1456,29 +1318,25 @@ cssToClip.addObjectBounds = function( boundsInfo )
 
 	// In CSS, the border width is added to the -outside- of the bounds.  In order to match
 	// the default behavior in PS, we adjust it here.
-	if (boundsInfo.borderWidth > 0)
-	{
+	if (boundsInfo.borderWidth > 0) {
 		width -=  2*boundsInfo.borderWidth;
 		height -= 2*boundsInfo.borderWidth;
 	}
 	// Don't generate a width for "line" (paint) style text.
-	if (! boundsInfo.textLine)
-	{
+	if (! boundsInfo.textLine) {
 		this.addText( "width: " + ((width < 0) ? 0 : width.asCSS()) + ";");
 		this.addText( "height: " + ((height < 0) ? 0 : height.asCSS()) + ";");
 	}
 }
 
 // Only called for shape (vector) layers.
-cssToClip.getShapeLayerCSS = function( boundsInfo )
-{
+cssToClip.getShapeLayerCSS = function( boundsInfo ) {
 	// If we have AGM stroke style info, generate that.
 	var agmDesc = this.getLayerAttr( "AGMStrokeStyleInfo" );
 	boundsInfo.borderWidth = 0;
 	var opacity = this.getLayerAttr("opacity" );
 
-	if (agmDesc && agmDesc.getVal( "strokeEnabled"))
-	{
+	if (agmDesc && agmDesc.getVal( "strokeEnabled")) {
 		// Assumes pixels!
 		boundsInfo.borderWidth = makeUnitVal(agmDesc.getVal( "strokeStyleLineWidth" ));
 		this.addStyleLine( "border-width: $strokeStyleLineWidth$;", agmDesc );
@@ -1486,8 +1344,7 @@ cssToClip.getShapeLayerCSS = function( boundsInfo )
 		var cap = agmDesc.getVal( "strokeStyleLineCapType" );
 		var dashes = agmDesc.getVal( "strokeStyleLineDashSet", false );
 
-		if (dashes && dashes.length > 0)
-		{
+		if (dashes && dashes.length > 0) {
 			if ((cap == "strokeStyleRoundCap") && (dashes[0] == 0))
 				this.addStyleLine("border-style: dotted;" );
 			if ((cap == "strokeStyleButtCap") && (dashes[0] > 0))
@@ -1500,8 +1357,7 @@ cssToClip.getShapeLayerCSS = function( boundsInfo )
 	// Check for layerFX style borders
 	var fxDesc = this.getLayerAttr( "layerEffects.frameFX" );
 	if (fxDesc && fxDesc.getVal( "enabled" )
-		&& (fxDesc.getVal( "paintType" ) == "solidColor"))
-	{
+		&& (fxDesc.getVal( "paintType" ) == "solidColor")) {
 		opacity = (stripUnits( fxDesc.getVal("opacity") ) / 100) * opacity;
 
 		boundsInfo.borderWidth = makeUnitVal(fxDesc.getVal( "size" )); // Assumes pixels!
@@ -1519,14 +1375,12 @@ cssToClip.getShapeLayerCSS = function( boundsInfo )
 	app.activeDocument.activeLayer = saveLayer;
 
 	// We assume path coordinates are in pixels, they're not stored as UnitValues in the DOM.
-	if (shapeGeom)
-	{
+	if (shapeGeom) {
 		// In CSS, the borderRadius needs to be added to the borderWidth, otherwise ovals
 		// turn into rounded rects.
 		if (shapeGeom[2] == "ellipse")
 			this.addText("border-radius: 50%;");
-		else
-		{
+		else {
 			var radius =  Math.round((shapeGeom[0]+shapeGeom[1])/2);
 			// Note: path geometry is -always- in points ... unless the ruler type is Pixels.
 			radius = (app.preferences.rulerUnits == Units.PIXELS)
@@ -1539,15 +1393,12 @@ cssToClip.getShapeLayerCSS = function( boundsInfo )
 
 	var i, gradientCSS = this.gradientToCSS();
 	if (!agmDesc 	// If AGM object, only fill if explictly turned on
-		|| (agmDesc && agmDesc.getVal("fillEnabled")))
-	{
-		if (gradientCSS)
-		{
+		|| (agmDesc && agmDesc.getVal("fillEnabled"))) {
+		if (gradientCSS) {
 			// for (i in this.browserTags)
 				this.addText( "background-image: " + gradientCSS);
 		}
-		else
-		{
+		else {
 			var fillOpacity = this.getLayerAttr("fillOpacity") / 255.0;
 			if (fillOpacity < 1.0)
 				this.addRGBAColor( "background-color", fillOpacity, this.getLayerAttr( "adjustment" ));
@@ -1561,10 +1412,8 @@ cssToClip.getShapeLayerCSS = function( boundsInfo )
 }
 
 // Only called for text layers.
-cssToClip.getTextLayerCSS = function( boundsInfo )
-{
-	function isStyleOn( textDesc, defTextDesc, styleKey, onText )
-	{
+cssToClip.getTextLayerCSS = function( boundsInfo ) {
+	function isStyleOn( textDesc, defTextDesc, styleKey, onText ) {
 		var styleText = textDesc.getVal( styleKey );
 		if (! styleText && defTextDesc)
 			styleText = defTextDesc.getVal( styleKey );
@@ -1586,15 +1435,13 @@ cssToClip.getTextLayerCSS = function( boundsInfo )
 	var defaultDesc = this.getLayerAttr( "textKey.paragraphStyleRange.paragraphStyle.defaultStyle" );
 	if (! defaultDesc)
 		defaultDesc = this.getLayerAttr("textKey.textStyleRange.textStyle.baseParentStyle");
-	if (textDesc)
-	{
+	if (textDesc) {
 //		this.addStyleLine2( "font-size: $size$;", textDesc, defaultDesc );
 		this.addTextSize( textDesc, defaultDesc );
 		this.addStyleLine2( 'font-family: "$fontName$";', textDesc, defaultDesc );
 		if (opacity == 1.0)
 			this.addStyleLine2( "color: $color$;", textDesc, defaultDesc );	// Color can just default to black
-		else
-		{
+		else {
 			if (textDesc.getVal("color"))
 				this.addRGBAColor( "color" , opacity, textDesc );
 			else
@@ -1624,8 +1471,7 @@ cssToClip.getTextLayerCSS = function( boundsInfo )
 		var fontLeading = textDesc.getVal( "leading" );
 		if (fontSize)
 			fontSize = stripUnits(fontSize);
-		if (fontSize && fontLeading)
-		{
+		if (fontSize && fontLeading) {
 			leadingOffset = fontLeading;
 			boundsInfo.textLineHeight = round1k(stripUnits(fontLeading) / fontSize);
 		}
@@ -1635,8 +1481,7 @@ cssToClip.getTextLayerCSS = function( boundsInfo )
 			boundsInfo.textFontSize = fontSize;
 
 		var pgraphStyle = this.getLayerAttr( "textKey.paragraphStyleRange.paragraphStyle" );
-		if (pgraphStyle)
-		{
+		if (pgraphStyle) {
 			this.addStyleLine( "text-align: $align$;", pgraphStyle );
 			var lineIndent = pgraphStyle.getVal( "firstLineIndent" );
 			if (lineIndent && (stripUnits(lineIndent) != 0))
@@ -1667,8 +1512,7 @@ cssToClip.getTextLayerCSS = function( boundsInfo )
 		var hScale = textDesc.getVal("horizontalScale");
 		vScale = (typeof vScale == "number") ? round1k(vScale/100.0) : 1;
 		hScale = (typeof hScale == "number") ? round1k(hScale/100.0) : 1;
-		if (textXform)
-		{
+		if (textXform) {
 			function xfm(key) { return textXform.getVal( key ); }
 
 			var xformData = this.currentPSLayerInfo.replaceDescKey("[$xx$, $xy$, $yx$, $yy$, $tx$, $ty$]", textXform);
@@ -1677,17 +1521,14 @@ cssToClip.getTextLayerCSS = function( boundsInfo )
 			m[3] *= vScale;
 			if (! ((m[0] == 1) && (m[1] == 0)
 				&& (m[2] == 0) && (m[3] == 1)
-				&& (m[4] == 0) && (m[5] == 0)))
-			{
+				&& (m[4] == 0) && (m[5] == 0))) {
 				boundsInfo.rawTextBounds = baseDesc.getVal("boundingBox").extractBounds();
 				this.addText("transform: matrix(" + m.join(", ") + ");");
 			}
 		}
-		else
-		{
+		else {
 			// Case for text not otherwise transformed.
-			if ((vScale != 1.0) || (hScale != 1.0))
-			{
+			if ((vScale != 1.0) || (hScale != 1.0)) {
 				boundsInfo.rawTextBounds = baseDesc.getVal("boundingBox").extractBounds();
 				this.addText( "transform: scale(" + hScale + ", " + vScale + ");");
 			}
@@ -1695,15 +1536,13 @@ cssToClip.getTextLayerCSS = function( boundsInfo )
 	}
 }
 
-cssToClip.getPixelLayerCSS = function()
-{
+cssToClip.getPixelLayerCSS = function() {
 	var name = this.getLayerAttr( "name" );
 	// If suffix isn't present, add one.  Assume file is in same folder as parent.
 	if (name.search( /[.]((\w){3,4})$/ ) < 0) {
 		this.addStyleLine( 'background-image: url("$name$.png");');
 	}
-	else
-	{
+	else {
 		// If the layer has a suffix, assume Generator-style naming conventions
 		var docSuffix = app.activeDocument.name.search(/([.]psd)$/i);
 		var docFolder = (docSuffix < 0) ? app.activeDocument.name
@@ -1725,8 +1564,7 @@ cssToClip.getPixelLayerCSS = function()
 // This walks the group and outputs all visible items in that group.  If the current
 // layer is not a group, then it walks to the end of the document (i.e., for dumping
 // the whole document).
-cssToClip.getGroupLayers = function ( currentLayer, memberTest, processAllLayers)
-{
+cssToClip.getGroupLayers = function ( currentLayer, memberTest, processAllLayers) {
 
 	processAllLayers = (typeof processAllLayers === "undefined") ? false : processAllLayers;
 	// If processing all of the layers, don't stop at the end of the first group
@@ -1735,8 +1573,7 @@ cssToClip.getGroupLayers = function ( currentLayer, memberTest, processAllLayers
 	var curIndex = currentLayer.index;
 	var saveGroup = [];
 
-	if (currentLayer.layerKind === kLayerGroupSheet)
-	{
+	if (currentLayer.layerKind === kLayerGroupSheet) {
 		if (! currentLayer.visible) {
 			return;
 		}
@@ -1744,13 +1581,10 @@ cssToClip.getGroupLayers = function ( currentLayer, memberTest, processAllLayers
 	}
 
 	var groupLayers = [];
-	while ((curIndex > 0) && (layerLevel > 0))
-	{
+	while ((curIndex > 0) && (layerLevel > 0)) {
 		var nextLayer = new PSLayerInfo(curIndex, false);
-		if (memberTest(nextLayer.layerKind))
-		{
-			if (nextLayer.layerKind === kLayerGroupSheet)
-			{
+		if (memberTest(nextLayer.layerKind)) {
+			if (nextLayer.layerKind === kLayerGroupSheet) {
 				if (nextLayer.visible && (visibleLevel === layerLevel)) {
 					visibleLevel++;
 					// The layers and section bounds must be swapped
@@ -1760,16 +1594,14 @@ cssToClip.getGroupLayers = function ( currentLayer, memberTest, processAllLayers
 				}
 				layerLevel++;
 			}
-			else
-			{
+			else {
 				if (nextLayer.visible && (visibleLevel === layerLevel)) {
 					groupLayers.push(nextLayer);
 				}
 			}
 		}
 		else
-		if (nextLayer.layerKind === kHiddenSectionBounder)
-		{
+		if (nextLayer.layerKind === kHiddenSectionBounder) {
 			layerLevel--;
 			if (layerLevel < visibleLevel) {
 				visibleLevel = layerLevel;
@@ -1784,8 +1616,7 @@ cssToClip.getGroupLayers = function ( currentLayer, memberTest, processAllLayers
 };
 
 // Recursively count the number of layers in the group, for progress bar
-cssToClip.countGroupLayers = function( layerGroup, memberTest )
-{
+cssToClip.countGroupLayers = function( layerGroup, memberTest ) {
 	if (! memberTest)
 		memberTest = cssToClip.isCSSLayerKind;
 	var currentLayer = new PSLayerInfo( layerGroup.itemIndex - cssToClip.documentIndexOffset);
@@ -1800,18 +1631,15 @@ cssToClip.countGroupLayers = function( layerGroup, memberTest )
 // The CSS for nested DIVs (essentially; what's going on with groups)
 // are NOT specified hierarchically.  So we need to finish this group's
 // output, then create the CSS for everything in it.
-cssToClip.pushGroupLevel = function()
-{
-	if (this.groupLevel == 0)
-	{
+cssToClip.pushGroupLevel = function() {
+	if (this.groupLevel == 0) {
 		var numSteps = this.countGroupLayers( this.getCurrentLayer() )+1;
 		this.groupProgress.totalProgressSteps = numSteps;
 	}
 	this.groupLevel++;
 }
 
-cssToClip.popGroupLevel = function()
-{
+cssToClip.popGroupLevel = function() {
 	var i, saveGroupLayer = this.getCurrentLayer();
 	var saveLeft = this.currentLeft, saveTop = this.currentTop;
 	var bounds = this.getLayerBounds();
@@ -1820,8 +1648,7 @@ cssToClip.popGroupLevel = function()
 	this.currentTop = bounds[1];
 	var notAborted = true;
 
-	for (i = 0; ((i < saveGroupLayer.layers.length) && notAborted); ++i)
-	{
+	for (i = 0; ((i < saveGroupLayer.layers.length) && notAborted); ++i) {
 		this.setCurrentLayer( saveGroupLayer.layers[i] );
 		if (this.isCSSLayerKind())
 			notAborted = this.gatherLayerCSS();
@@ -1833,8 +1660,7 @@ cssToClip.popGroupLevel = function()
 	return notAborted;
 }
 
-cssToClip.layerNameToCSS = function( layerName )
-{
+cssToClip.layerNameToCSS = function( layerName ) {
 	const kMaxLayerNameLength = 50;
 
 	// Remove any user-supplied class/ID delimiter
@@ -1858,8 +1684,7 @@ cssToClip.layerNameToCSS = function( layerName )
 
 // Gather the CSS info for the current layer, and add it to this.cssText
 // Returns FALSE if the process was aborted.
-cssToClip.gatherLayerCSS = function()
-{
+cssToClip.gatherLayerCSS = function() {
 	// Script can't be called from PS context menu unless there is an active layer
 	var curLayer = this.getCurrentLayer();
 
@@ -1891,8 +1716,7 @@ cssToClip.gatherLayerCSS = function()
 	this.pushIndent();
 	var boundsInfo = new BoundsParameters();
 
-	switch (layerKind)
-	{
+	switch (layerKind) {
 		case kLayerGroupSheet:	this.pushGroupLevel();		break;
 		case kVectorSheet:		this.getShapeLayerCSS( boundsInfo );	break;
 		case kTextSheet:		this.getTextLayerCSS( boundsInfo );		break;
@@ -1925,8 +1749,7 @@ cssToClip.gatherLayerCSS = function()
 }
 
 // Main entry point
-cssToClip.copyLayerCSSToClipboard = function()
-{
+cssToClip.copyLayerCSSToClipboard = function() {
 	var resultObj = new Object();
 
 	app.doProgress( localize("$$$/Photoshop/Progress/CopyCSSProgress=Copying CSS..."), "this.copyLayerCSSToClipboardWithProgress(resultObj)");
@@ -1934,8 +1757,7 @@ cssToClip.copyLayerCSSToClipboard = function()
 	return resultObj.msg;
 }
 
-cssToClip.copyLayerCSSToClipboardWithProgress = function(outResult)
-{
+cssToClip.copyLayerCSSToClipboardWithProgress = function(outResult) {
 	this.reset();
 	var saveUnits = app.preferences.rulerUnits;
 
@@ -1947,8 +1769,7 @@ cssToClip.copyLayerCSSToClipboardWithProgress = function(outResult)
 			return;						// aborted
 		elapsedTime = new Date() - then;
 	}
-	catch (err)
-	{
+	catch (err) {
 		// Copy CSS fails if a new doc pops open before it's finished, possible if Cmd-N is selected
 		// before the progress bar is up.  This message isn't optimal, but it was too late to get a
 		// proper error message translated, so this was close enough.
@@ -1971,8 +1792,7 @@ cssToClip.copyLayerCSSToClipboardWithProgress = function(outResult)
 // Dump out a layer attribute as text.  This is how you learn what attributes are available.
 // Note this only works for ActionDescriptor or ActionList layer attributes; for simple
 // types just call cssToClip.getLayerAttr().
-cssToClip.dumpLayerAttr = function( keyName )
-{
+cssToClip.dumpLayerAttr = function( keyName ) {
 	this.setCurrentLayer( app.activeDocument.activeLayer );
 	var ref = new ActionReference();
 	ref.putIdentifier( classLayer, app.activeDocument.activeLayer.id );
@@ -1984,11 +1804,9 @@ cssToClip.dumpLayerAttr = function( keyName )
 	if ((desc.typename == "ActionDescriptor") || (desc.typename == "ActionList"))
 		desc.dumpDesc( keyName );
 	else
-	if ((typeof desc != "string") && (desc.length >= 1))
-	{
+	if ((typeof desc != "string") && (desc.length >= 1)) {
 		s = []
-		for (var i in desc)
-		{
+		for (var i in desc) {
 			if ((typeof desc[i] == "object")
 				&& (desc[i].typename in {"ActionDescriptor":1, "ActionList":1 }))
 				desc[i].dumpDesc( keyName + "[" +i + "]" );
@@ -2015,8 +1833,7 @@ cssToClip.allLayerAttrs = ['AGMStrokeStyleInfo','adjustment','background','bound
 	'XMPMetadataAsUTF8'];
 
 // Dump all the available attributes on the layer.
-cssToClip.dumpAllLayerAttrs = function()
-{
+cssToClip.dumpAllLayerAttrs = function() {
 	this.setCurrentLayer( app.activeDocument.activeLayer );
 
 	var ref = new ActionReference();
@@ -2024,8 +1841,7 @@ cssToClip.dumpAllLayerAttrs = function()
 	var desc = executeActionGet( ref );
 
 	var i;
-	for (i = 0; i < this.allLayerAttrs.length; ++i)
-	{
+	for (i = 0; i < this.allLayerAttrs.length; ++i) {
 		var attr = this.allLayerAttrs[i];
 		var attrDesc = null;
 		try {
@@ -2035,22 +1851,19 @@ cssToClip.dumpAllLayerAttrs = function()
 			else
 				$.writeln( attr + ": null" );
 		}
-		catch (err)
-		{
+		catch (err) {
 			$.writeln( attr + ': ' + err.message );
 		}
 	}
 }
 
 // Walk the document's layers and describe them.
-cssToClip.dumpLayers = function( layerSet )
-{
+cssToClip.dumpLayers = function( layerSet ) {
 	var i, layerID;
 	if (typeof layerSet == "undefined")
 		layerSet = app.activeDocument;
 
-	for (i= 0; i < layerSet.layers.length; ++i)
-	{
+	for (i= 0; i < layerSet.layers.length; ++i) {
 		if (layerSet.layers[i].typename == "LayerSet")
 			this.dumpLayers( layerSet.layers[i] );
 		this.setCurrentLayer( layerSet.layers[i] );
@@ -2059,8 +1872,7 @@ cssToClip.dumpLayers = function( layerSet )
 	}
 }
 
-cssToClip.logToHeadlights = function(eventRecord)
-{
+cssToClip.logToHeadlights = function(eventRecord) {
 	var headlightsActionID = stringIDToTypeID("headlightsLog");
 	var desc = new ActionDescriptor();
 	desc.putString(stringIDToTypeID("subcategory"), "Export");
@@ -2070,21 +1882,17 @@ cssToClip.logToHeadlights = function(eventRecord)
 
 
 
-function testProgress()
-{
+function testProgress() {
 	app.doProgress( localize("$$$/Photoshop/Progress/CopyCSSProgress=Copying CSS..."),"testProgressTask()" );
 }
 
-function testProgressTask()
-{
+function testProgressTask() {
 	var i, total = 10;
 	var progBar = new ProgressBar();
 	progBar.totalProgressSteps = total;
-	for (i = 0; i <= total; ++i)
-	{
+	for (i = 0; i <= total; ++i) {
 //		if (progBar.updateProgress( i ))
-		if (progBar.nextProgress())
-		{
+		if (progBar.nextProgress()) {
 			$.writeln('cancelled');
 			break;
 		}
