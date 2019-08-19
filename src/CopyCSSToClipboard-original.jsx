@@ -699,7 +699,7 @@ PSLayerInfo.prototype.gradientDesc = function( useLayerFX ) {
 	if (descList && descList.getVal("gradient")) {
 		return descList;
 	}
-	else		// If there's no adjustment layer, see if we have one from layerFX... {
+	else {		// If there's no adjustment layer, see if we have one from layerFX...
 		if (useLayerFX)
 			descList = this.getLayerAttr( "layerEffects.gradientFill" );
 	}
@@ -1084,7 +1084,7 @@ cssToClip.extractShapeGeometry = function() {
 			&& (pathPt.leftDirection[xy] == pathPt.anchor[xy]);
 	}
 
-	function dumpPts( pts )	// For debug viewing in Matlab {
+	function dumpPts( pts )	{ // For debug viewing in Matlab
 		function pt2str( pt ) { return "[" + Math.floor(pt[0]) + ", " + Math.floor(pt[1]) + "]"; }
 		var i;
 		for (i = 0; i < pts.length; ++i)
@@ -1105,7 +1105,7 @@ cssToClip.extractShapeGeometry = function() {
 	// If we have a plausible path, walk the geometry and see if it matches a shape we know about.
 	if ((path.kind == PathKind.VECTORMASK) && (path.subPathItems.length == 1)) {
 		var subPath = path.subPathItems[0];
-		if (subPath.closed && (subPath.pathPoints.length == 4))	// Ellipse? {
+		if (subPath.closed && (subPath.pathPoints.length == 4)) {// Ellipse?
 			function next(index) { return (index + 1) % 4; }
 			function prev(index) { return (index > 0) ? (index-1) : 3; }
 			var pts = subPath.pathPoints;
@@ -1122,7 +1122,7 @@ cssToClip.extractShapeGeometry = function() {
 			// Return the X,Y radius
 			return [pts[1].anchor[0] - pts[0].anchor[0], pts[1].anchor[1] - pts[0].anchor[1], "ellipse"];
 		}
-		else if (subPath.closed && (subPath.pathPoints.length == 8))	// RoundRect? {
+		else if (subPath.closed && (subPath.pathPoints.length == 8)) {	// RoundRect?
 			var pts = subPath.pathPoints;
 			//dumpPts( pts );
 			function sameCoord2( pt, xy, io ) {
