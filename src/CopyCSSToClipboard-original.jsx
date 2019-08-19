@@ -1145,18 +1145,6 @@ cssToClip.addStyleLine = function( cssText, baseDesc, browserTagList )
 	return !replacementFailed;
 }
 
-cssToClip.addHtmLine = function( cssText, baseDesc )
-{
-	var result = this.currentPSLayerInfo.replaceDescKey( cssText, baseDesc );
-	var replacementFailed = result[0];
-	cssText = result[1];
-
-	if (! replacementFailed)
-		this.htmlText += ( cssText + "\n");
-
-	return !replacementFailed;
-}
-
 // Text items need to try both the base and the default descriptors
 cssToClip.addStyleLine2 = function( cssText, baseDesc, backupDesc )
 {
@@ -1885,15 +1873,21 @@ cssToClip.gatherLayerCSS = function()
 	var isCSSid = (curLayer.name[0] == '#'); // Flag if generating ID not class
 	var layerName = this.layerNameToCSS( curLayer.name );
 
-	// this.htmlText += ('\t<div class="' + layerName + '$itemIndex$"></div>' + "\n");
 	var textString = ''
 	if(layerKind == kTextSheet){
 		textString = this.getLayerAttr("textKey.textKey");
 	}
 
-	this.addHtmLine('\t<div class="' + layerName + '-$itemIndex$">' + textString + '</div>' )
-	// this.addText( (isCSSid ? "#" : ".") + layerName + "$itemIndex$ {" );
-	this.addStyleLine( (isCSSid ? "#" : ".") + layerName + "-$itemIndex$ {" );
+	const layerID = cssToClip.getLayerAttr( "layerID" )
+	const itemIndex = cssToClip.getLayerAttr( "itemIndex" )
+
+	const moduleName = '_' + layerID + '-' + itemIndex
+
+	const htmlText = '\t<div class="' + moduleName + '">' + textString + '</div>'
+	this.htmlText += ( htmlText + "\n");
+
+	this.addText( (isCSSid ? "#" : ".") + moduleName + " {" );
+
 	this.pushIndent();
 	var boundsInfo = new BoundsParameters();
 
