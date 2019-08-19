@@ -406,33 +406,6 @@ ActionList.prototype.dumpDesc = function( keyName ) {
 		}
 }
 
-//////////////////////////////////// ProgressBar //////////////////////////////////////
-
-// "ProgressBar" provides an abstracted interface to the progress bar DOM. It keeps
-// track of the total steps and number of steps completed so task steps can simply call
-// nextProgress().
-
-function ProgressBar() {
-	this.totalProgressSteps = 0;
-	this.currentProgress = 0;
-}
-
-// You must set cssToClip.totalProgressSteps to the total number of
-// steps to complete before calling this or nextProgress().
-// Returns true if aborted.
-ProgressBar.prototype.updateProgress = function( done ) {
-	if (this.totalProgressSteps == 0)
-		return false;
-
-	return !app.updateProgress( done, this.totalProgressSteps );
-}
-
-// Returns true if aborted.
-ProgressBar.prototype.nextProgress = function() {
-	this.currentProgress++;
-	return this.updateProgress( this.currentProgress );
-}
-
 //////////////////////////////////// PSLayer //////////////////////////////////////
 
 // The overhead for using Photoshop DOM layers is high, and can be
@@ -930,7 +903,7 @@ cssToClip.reset = function() {
 	this.currentLeft = 0;
 	this.currentTop = 0;
 
-	this.groupProgress = new ProgressBar();
+	// this.groupProgress = new ProgressBar();
 
 	this.aborted = false;
 
@@ -1613,27 +1586,10 @@ cssToClip.getGroupLayers = function ( currentLayer, memberTest, processAllLayers
 	return groupLayers;
 };
 
-// Recursively count the number of layers in the group, for progress bar
-cssToClip.countGroupLayers = function( layerGroup, memberTest ) {
-	if (! memberTest)
-		memberTest = cssToClip.isCSSLayerKind;
-	var currentLayer = new PSLayerInfo( layerGroup.itemIndex - cssToClip.documentIndexOffset);
-	var groupLayers = this.getGroupLayers( currentLayer, memberTest );
-	var i, visLayers = 0;
-	for (i = 0; i < groupLayers.length; ++i)
-		if (typeof groupLayers[i] === "object")
-			visLayers++;
-	return visLayers;
-}
-
 // The CSS for nested DIVs (essentially; what's going on with groups)
 // are NOT specified hierarchically.  So we need to finish this group's
 // output, then create the CSS for everything in it.
 cssToClip.pushGroupLevel = function() {
-	if (this.groupLevel == 0) {
-		var numSteps = this.countGroupLayers( this.getCurrentLayer() )+1;
-		this.groupProgress.totalProgressSteps = numSteps;
-	}
 	this.groupLevel++;
 }
 
@@ -1722,8 +1678,8 @@ cssToClip.gatherLayerCSS = function() {
 	}
 
 	var aborted = false;
-	if (this.groupLevel > 0)
-		aborted = this.groupProgress.nextProgress();
+	// if (this.groupLevel > 0)
+	// 	aborted = this.groupProgress.nextProgress();
 	if (aborted)
 		return false;
 
