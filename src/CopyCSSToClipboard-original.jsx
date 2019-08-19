@@ -1127,16 +1127,8 @@ cssToClip.popIndent = function()
 	this.indentSpaces = this.indentSpaces.slice(0,-2);
 }
 
-cssToClip.addText = function( text, browserTagList  )
+cssToClip.addText = function( text )
 {
-	var i;
-	if (typeof browserTagList == "undefined")
-		browserTagList = null;
-
-	if (browserTagList)
-		for (i in browserTagList)
-			this.cssText += (this.indentSpaces + browserTagList[i] + text + "\n");
-	else
 		this.cssText += (this.indentSpaces + text + "\n");
 //	$.writeln(text);	// debug
 }
@@ -1149,6 +1141,18 @@ cssToClip.addStyleLine = function( cssText, baseDesc, browserTagList )
 
 	if (! replacementFailed)
 		this.addText( cssText, browserTagList );
+
+	return !replacementFailed;
+}
+
+cssToClip.addHtmLine = function( cssText, baseDesc )
+{
+	var result = this.currentPSLayerInfo.replaceDescKey( cssText, baseDesc );
+	var replacementFailed = result[0];
+	cssText = result[1];
+
+	if (! replacementFailed)
+		this.htmlText += ( cssText + "\n");
 
 	return !replacementFailed;
 }
@@ -1881,9 +1885,15 @@ cssToClip.gatherLayerCSS = function()
 	var isCSSid = (curLayer.name[0] == '#'); // Flag if generating ID not class
 	var layerName = this.layerNameToCSS( curLayer.name );
 
-	// this.addText('<div class="' + layerName + '"></div>')
-	this.htmlText += ('\t<div class="' + layerName + '"></div>' + "\n");
-	this.addText( (isCSSid ? "#" : ".") + layerName + " {" );
+	// this.htmlText += ('\t<div class="' + layerName + '$itemIndex$"></div>' + "\n");
+	var textString = ''
+	if(layerKind == kTextSheet){
+		textString = this.getLayerAttr("textKey.textKey");
+	}
+
+	this.addHtmLine('\t<div class="' + layerName + '-$itemIndex$">' + textString + '</div>' )
+	// this.addText( (isCSSid ? "#" : ".") + layerName + "$itemIndex$ {" );
+	this.addStyleLine( (isCSSid ? "#" : ".") + layerName + "-$itemIndex$ {" );
 	this.pushIndent();
 	var boundsInfo = new BoundsParameters();
 
