@@ -1642,20 +1642,11 @@ cssToClip.gatherLayerCSS = function() {
 	if ((! this.isCSSLayerKind( layerKind )) || (! curLayer.visible)) return true;
 
 	var isCSSid = (curLayer.name[0] == '#'); // Flag if generating ID not class
+
 	var layerName = this.layerNameToCSS( curLayer.name );
-
-	var textString = ''
-	if(layerKind == kTextSheet){
-		textString = this.getLayerAttr("textKey.textKey");
-	}
-
 	const layerID = cssToClip.getLayerAttr( "layerID" )
 	const itemIndex = cssToClip.getLayerAttr( "itemIndex" )
-
 	const moduleName = '_' + layerID + '-' + layerName + '-' + itemIndex
-
-	const htmlText = '\t<div class="' + moduleName + '">' + textString + '</div>'
-	this.htmlText += ( htmlText + "\n");
 
 	this.addText( (isCSSid ? "#" : ".") + moduleName + " {" );
 
@@ -1732,7 +1723,8 @@ cssToClip.copyLayerCSSToClipboardWithProgress = function(outResult) {
 cssToClip.dumpLayerAttr = function( keyName ) {
 	// this.setCurrentLayer( app.activeDocument.activeLayer );
 	var ref = new ActionReference();
-	ref.putIdentifier( classLayer, app.activeDocument.activeLayer.id );
+	var curLayer = this.getCurrentLayer();
+	ref.putIdentifier( classLayer, curLayer.id );
 	layerDesc = executeActionGet( ref );
 
 	var desc = layerDesc.getVal( keyName, false );
@@ -1764,7 +1756,7 @@ cssToClip.allLayerAttrs = ['AGMStrokeStyleInfo','adjustment','background','bound
 	'hasUserMask','hasVectorMask','itemIndex','layer3D','layerEffects','layerFXVisible',
 	'layerSection','layerID','layerKind','layerLocking','layerSVGdata','layerSection',
 	'linkedLayerIDs','metadata','mode','name','opacity','preserveTransparency',
-	'smartObject','targetChannels','textKey','useAlignedRendering','useAlignedRendering',
+	'smartObject','targetChannels','textKey.textKey','useAlignedRendering','useAlignedRendering',
 	'userMaskDensity','userMaskEnabled','userMaskFeather','userMaskLinked',
 	'vectorMaskDensity','vectorMaskFeather','videoLayer','visible','visibleChannels',
 	'XMPMetadataAsUTF8'];
@@ -1773,9 +1765,9 @@ cssToClip.allLayerAttrs = ['AGMStrokeStyleInfo','adjustment','background','bound
 cssToClip.dumpAllLayerAttrs = function() {
 	// this.setCurrentLayer( app.activeDocument.activeLayer );
 
-	var ref = new ActionReference();
-	ref.putIndex( classLayer, app.activeDocument.activeLayer.itemIndex );
-	var desc = executeActionGet( ref );
+	// var ref = new ActionReference();
+	// ref.putIndex( classLayer, app.activeDocument.activeLayer.itemIndex );
+	// var desc = executeActionGet( ref );
 
 	for (var i = 0; i < this.allLayerAttrs.length; ++i) {
 		var attr = this.allLayerAttrs[i];
@@ -1796,17 +1788,37 @@ cssToClip.dumpAllLayerAttrs = function() {
 
 // Walk the document's layers and describe them.
 cssToClip.dumpLayers = function( layerSet ) {
-	var i, layerID;
 	if (typeof layerSet == "undefined") layerSet = app.activeDocument.activeLayer
 
-	for (i= 0; i < layerSet.layers.length; ++i) {
+	for (var i= 0; i < layerSet.layers.length; ++i) {
 		if (layerSet.layers[i].typename == "LayerSet") this.dumpLayers( layerSet.layers[i] );
 
 		this.setCurrentLayer( layerSet.layers[i] );
-		layerID = (layerSet.layers[i].isBackground) ? "BG" : cssToClip.getLayerAttr( "layerID" );
-		this.debugText += ("Layer[" + cssToClip.getLayerAttr( "itemIndex" ) + "] ID=" + layerID + " name: " + cssToClip.getLayerAttr( "name" ) + '\n');
-		cssToClip.dumpAllLayerAttrs()
+		// const layerID = (layerSet.layers[i].isBackground) ? "BG" : cssToClip.getLayerAttr( "layerID" );
+		this.gatherLayerHtml(layerSet.layers[i])
+
+		// this.debugText += ("Layer[" + cssToClip.getLayerAttr( "itemIndex" ) + "] ID=" + layerID + " name: " + cssToClip.getLayerAttr( "name" ) + '\n');
+		// cssToClip.dumpAllLayerAttrs()
 	}
+}
+
+cssToClip.gatherLayerHtml = function (curLayer) {
+	var layerKind = this.currentPSLayerInfo.layerKind;
+
+	var layerName = this.layerNameToCSS( curLayer.name );
+
+	var textString = ''
+	if(layerKind == kTextSheet){
+		textString = this.getLayerAttr("textKey.textKey");
+	}
+
+	var layerID = cssToClip.getLayerAttr( "layerID" )
+	var itemIndex = cssToClip.getLayerAttr( "itemIndex" )
+
+	var moduleName = '_' + layerID + '-' + layerName + '-' + itemIndex
+
+	var htmlText = '\t<div class="' + moduleName + '">' + textString + '</div>'
+	this.htmlText += ( htmlText + "\n");
 }
 
 // Debug.  Uncomment one of these lines, and watch the output
