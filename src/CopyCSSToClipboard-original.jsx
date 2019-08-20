@@ -1646,8 +1646,9 @@ cssToClip.gatherLayerCSS = function() {
 	var layerName = this.layerNameToCSS( curLayer.name );
 	const layerID = cssToClip.getLayerAttr( "layerID" )
 	const itemIndex = cssToClip.getLayerAttr( "itemIndex" )
-	const moduleName = '_' + layerID + '-' + layerName + '-' + itemIndex
+	const moduleName = '_' + layerID + '-' + itemIndex
 
+	this.addText('/* ' + layerName + ' */')
 	this.addText( (isCSSid ? "#" : ".") + moduleName + " {" );
 
 	this.pushIndent();
@@ -1794,7 +1795,6 @@ cssToClip.dumpLayers = function( layerSet ) {
 		if (layerSet.layers[i].typename == "LayerSet") this.dumpLayers( layerSet.layers[i] );
 
 		this.setCurrentLayer( layerSet.layers[i] );
-		// const layerID = (layerSet.layers[i].isBackground) ? "BG" : cssToClip.getLayerAttr( "layerID" );
 		this.gatherLayerHtml(layerSet.layers[i])
 
 		// this.debugText += ("Layer[" + cssToClip.getLayerAttr( "itemIndex" ) + "] ID=" + layerID + " name: " + cssToClip.getLayerAttr( "name" ) + '\n');
@@ -1815,10 +1815,11 @@ cssToClip.gatherLayerHtml = function (curLayer) {
 	var layerID = cssToClip.getLayerAttr( "layerID" )
 	var itemIndex = cssToClip.getLayerAttr( "itemIndex" )
 
-	var moduleName = '_' + layerID + '-' + layerName + '-' + itemIndex
+	var moduleName = '_' + layerID + '-' + itemIndex
 
+	var comment = '\t<!-- ' + layerName + ' -->'
 	var htmlText = '\t<div class="' + moduleName + '">' + textString + '</div>'
-	this.htmlText += ( htmlText + "\n");
+	this.htmlText += ( comment + '\n' + htmlText + "\n");
 }
 
 // Debug.  Uncomment one of these lines, and watch the output
