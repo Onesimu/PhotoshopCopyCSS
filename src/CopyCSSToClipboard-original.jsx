@@ -368,15 +368,15 @@ ActionDescriptor.prototype.dumpDesc = function( keyName ) {
 
 				case DescValueType.REFERENCETYPE:
 					ref = this.getFlatType( key );
-					$.writeln( thisKey + ":ref:" + ref.refclass + ":" + ref.value );
+					this.debugText += ( thisKey + ":ref:" + ref.refclass + ":" + ref.value );
 					break;
 
 				default:
-					$.writeln( thisKey
+					this.debugText += ( thisKey
 						+ ": " + ActionDescriptor.dumpValue( this.getFlatType( key ) ) );
 			}
 		} catch (err) {
-			$.writeln("Error "+keyName+"["+i+"]: " + err.message);
+			this.debugText += ("Error "+keyName+"["+i+"]: " + err.message);
 		}
 	}
 }
@@ -387,7 +387,7 @@ ActionList.prototype.dumpDesc = function( keyName ) {
 		keyName = "";
 
 	if (this.count == 0)
-		$.writeln( keyName + " <empty list>" );
+		this.debugText += ( keyName + " <empty list>" );
 	else
 		for (i = 0; i < this.count; ++i) {
 			try {
@@ -397,11 +397,11 @@ ActionList.prototype.dumpDesc = function( keyName ) {
 				if (this.getType(i) == DescValueType.LISTTYPE)
 					this.getList(i).dumpDesc( keyName + "[" + i + "]" );
 				else
-					$.writeln( keyName + "[" + i + "]:"
+					this.debugText += ( keyName + "[" + i + "]:"
 						+ ActionDescriptor.dumpValue( this.getFlatType( i ) ) );
 			}
 			catch (err) {
-				$.writeln("Error "+keyName+"["+i+"]: " + err.message);
+				this.debugText += ("Error "+keyName+"["+i+"]: " + err.message);
 			}
 		}
 }
@@ -780,7 +780,7 @@ GradientStop.reverseStoplist = function( stopList ) {
 
 GradientStop.dumpStops = function( stopList ) {
 	for (var i in stopList)
-		$.writeln( stopList[i] );
+		this.debugText += ( stopList[i] );
 }
 
 // Gradient format: linear-gradient( <angle>, rgb( rr, gg, bb ) xx%, rgb( rr, gg, bb ), yy%, ... );
@@ -894,6 +894,7 @@ cssToClip.reset = function() {
 	this.pluginName = "CSSToClipboard";
 	this.cssText = "";
 	this.htmlText = "";
+	this.debugText = '';
 	this.indentSpaces = "";
 	// this.browserTags = ["-moz-", "-webkit-", "-ms-"];
 	this.currentLayer = null;
@@ -903,16 +904,11 @@ cssToClip.reset = function() {
 	this.currentLeft = 0;
 	this.currentTop = 0;
 
-	// this.groupProgress = new ProgressBar();
-
-	this.aborted = false;
-
 	// Work-around for screwy layer indexing.
 	this.documentIndexOffset = 0;
 	try {
 		// This throws an error if there's no background
-		if (app.activeDocument.backgroundLayer)
-			this.documentIndexOffset = 1;
+		if (app.activeDocument.backgroundLayer) this.documentIndexOffset = 1;
 	}
 	catch (err) {}
 }
@@ -928,7 +924,7 @@ cssToClip.copyTextToClipboard = function( txt ) {
 }
 
 cssToClip.copyCSSToClipboard = function() {
-	this.copyTextToClipboard( '<div>\n' + this.htmlText + '</div>\n' + '\n<style>\n' + this.cssText + '</style>\n');
+	this.copyTextToClipboard( '<div>\n' + this.htmlText + '</div>\n' + '\n<style>\n' + this.cssText + '</style>\n' + this.debugText);
 }
 
 cssToClip.isCSSLayerKind = function( layerKind ) {
@@ -1059,7 +1055,7 @@ cssToClip.extractShapeGeometry = function() {
 		function pt2str( pt ) { return "[" + Math.floor(pt[0]) + ", " + Math.floor(pt[1]) + "]"; }
 		var i;
 		for (i = 0; i < pts.length; ++i)
-			$.writeln( "[" + [pt2str(pts[i].rightDirection), pt2str(pts[i].anchor), pt2str(pts[i].leftDirection)].join( "; " ) + "];" );
+			this.debugText += ( "[" + [pt2str(pts[i].rightDirection), pt2str(pts[i].anchor), pt2str(pts[i].leftDirection)].join( "; " ) + "];" );
 	}
 
 	// Control point location for Bezier arcs.
@@ -1570,9 +1566,7 @@ cssToClip.getGroupLayers = function ( currentLayer, memberTest, processAllLayers
 					groupLayers.push(nextLayer);
 				}
 			}
-		}
-		else
-		if (nextLayer.layerKind === kHiddenSectionBounder) {
+		} else if (nextLayer.layerKind === kHiddenSectionBounder) {
 			layerLevel--;
 			if (layerLevel < visibleLevel) {
 				visibleLevel = layerLevel;
@@ -1604,8 +1598,7 @@ cssToClip.popGroupLevel = function() {
 
 	for (i = 0; ((i < saveGroupLayer.layers.length) && notAborted); ++i) {
 		this.setCurrentLayer( saveGroupLayer.layers[i] );
-		if (this.isCSSLayerKind())
-			notAborted = this.gatherLayerCSS();
+		if (this.isCSSLayerKind()) notAborted = this.gatherLayerCSS();
 	}
 	this.setCurrentLayer( saveGroupLayer );
 	this.groupLevel--;
@@ -1646,8 +1639,7 @@ cssToClip.gatherLayerCSS = function() {
 	var layerKind = this.currentPSLayerInfo.layerKind;
 	if (layerKind === kBackgroundSheet)     // Background == pixels. Never in groups.
 		layerKind = kPixelSheet;
-	if ((! this.isCSSLayerKind( layerKind )) || (! curLayer.visible))
-		return true;
+	if ((! this.isCSSLayerKind( layerKind )) || (! curLayer.visible)) return true;
 
 	var isCSSid = (curLayer.name[0] == '#'); // Flag if generating ID not class
 	var layerName = this.layerNameToCSS( curLayer.name );
@@ -1660,7 +1652,7 @@ cssToClip.gatherLayerCSS = function() {
 	const layerID = cssToClip.getLayerAttr( "layerID" )
 	const itemIndex = cssToClip.getLayerAttr( "itemIndex" )
 
-	const moduleName = '_' + layerID + '-' + itemIndex
+	const moduleName = '_' + layerID + '-' + layerName + '-' + itemIndex
 
 	const htmlText = '\t<div class="' + moduleName + '">' + textString + '</div>'
 	this.htmlText += ( htmlText + "\n");
@@ -1677,15 +1669,9 @@ cssToClip.gatherLayerCSS = function() {
 		case kPixelSheet:		this.getPixelLayerCSS();		break;
 	}
 
-	var aborted = false;
-	// if (this.groupLevel > 0)
-	// 	aborted = this.groupProgress.nextProgress();
-	if (aborted)
-		return false;
-
 	// Use the Opacity tag for groups, so it applies to all descendants.
-	if (layerKind == kLayerGroupSheet)
-		this.addOpacity();
+	if (layerKind == kLayerGroupSheet) this.addOpacity();
+
 	this.addObjectBounds( boundsInfo );
 	this.addStyleLine( "z-index: $itemIndex$;" );
 
@@ -1695,16 +1681,14 @@ cssToClip.gatherLayerCSS = function() {
 	var notAborted = true;
 
 	// If we're processing a group, now is the time to process the member layers.
-	if ((curLayer.typename == "LayerSet")
-		&& (this.groupLevel > 0))
-		notAborted = this.popGroupLevel();
+	if ((curLayer.typename == "LayerSet") && (this.groupLevel > 0)) notAborted = this.popGroupLevel();
 
 	return notAborted;
 }
 
 // Main entry point
 cssToClip.copyLayerCSSToClipboard = function() {
-	var resultObj = new Object();
+	var resultObj = {};
 
 	app.doProgress( localize("$$$/Photoshop/Progress/CopyCSSProgress=Copying CSS..."), "this.copyLayerCSSToClipboardWithProgress(resultObj)");
 
@@ -1719,8 +1703,8 @@ cssToClip.copyLayerCSSToClipboardWithProgress = function(outResult) {
 
 	try {
 		var elapsedTime, then = new Date();
-		if (! this.gatherLayerCSS())
-			return;						// aborted
+		if (! this.gatherLayerCSS()) return;						// aborted
+
 		elapsedTime = new Date() - then;
 	}
 	catch (err) {
@@ -1732,10 +1716,9 @@ cssToClip.copyLayerCSSToClipboardWithProgress = function(outResult) {
 		alert( localize( "$$$/Scripts/CopyCSSToClipboard/Error=Internal error creating CSS: " ) + err.message +
 			localize( "$$$/Scripts/CopyCSSToClipboard/ErrorLine= at script line ") + err.line );
 	}
-
+	cssToClip.dumpLayers();
 	cssToClip.copyCSSToClipboard();
-	if (saveUnits)
-		app.preferences.rulerUnits = saveUnits;
+	if (saveUnits) app.preferences.rulerUnits = saveUnits;
 
 	// We can watch this in ESTK without screwing up the app
 	outResult.msg = ("time: " + (elapsedTime / 1000.0) + " sec");
@@ -1747,7 +1730,7 @@ cssToClip.copyLayerCSSToClipboardWithProgress = function(outResult) {
 // Note this only works for ActionDescriptor or ActionList layer attributes; for simple
 // types just call cssToClip.getLayerAttr().
 cssToClip.dumpLayerAttr = function( keyName ) {
-	this.setCurrentLayer( app.activeDocument.activeLayer );
+	// this.setCurrentLayer( app.activeDocument.activeLayer );
 	var ref = new ActionReference();
 	ref.putIdentifier( classLayer, app.activeDocument.activeLayer.id );
 	layerDesc = executeActionGet( ref );
@@ -1768,10 +1751,10 @@ cssToClip.dumpLayerAttr = function( keyName ) {
 				s.push( desc[i].dumpDesc( keyName ) )
 		}
 		if (s.length > 0)
-			$.writeln( keyName +": [" + s.join(", ") + "]" );
+			this.debugText += ( keyName +": [" + s.join(", ") + "]" + '\n');
 	}
 	else
-		$.writeln(keyName + ": " + ActionDescriptor.dumpValue(desc) );
+		this.debugText += (keyName + ": " + ActionDescriptor.dumpValue(desc) + '\n');
 }
 
 // Taken from inspection of ULayerElement.cpp
@@ -1788,14 +1771,13 @@ cssToClip.allLayerAttrs = ['AGMStrokeStyleInfo','adjustment','background','bound
 
 // Dump all the available attributes on the layer.
 cssToClip.dumpAllLayerAttrs = function() {
-	this.setCurrentLayer( app.activeDocument.activeLayer );
+	// this.setCurrentLayer( app.activeDocument.activeLayer );
 
 	var ref = new ActionReference();
 	ref.putIndex( classLayer, app.activeDocument.activeLayer.itemIndex );
 	var desc = executeActionGet( ref );
 
-	var i;
-	for (i = 0; i < this.allLayerAttrs.length; ++i) {
+	for (var i = 0; i < this.allLayerAttrs.length; ++i) {
 		var attr = this.allLayerAttrs[i];
 		var attrDesc = null;
 		try {
@@ -1803,26 +1785,27 @@ cssToClip.dumpAllLayerAttrs = function() {
 			if (attrDesc)
 				this.dumpLayerAttr( attr );
 			else
-				$.writeln( attr + ": null" );
+				this.debugText += ( attr + ": null" + '\n');
 		}
 		catch (err) {
-			$.writeln( attr + ': ' + err.message );
+			this.debugText += ( attr + ': ' + err.message + '\n');
 		}
 	}
+	this.debugText += ('\n');
 }
 
 // Walk the document's layers and describe them.
 cssToClip.dumpLayers = function( layerSet ) {
 	var i, layerID;
-	if (typeof layerSet == "undefined")
-		layerSet = app.activeDocument;
+	if (typeof layerSet == "undefined") layerSet = app.activeDocument.activeLayer
 
 	for (i= 0; i < layerSet.layers.length; ++i) {
-		if (layerSet.layers[i].typename == "LayerSet")
-			this.dumpLayers( layerSet.layers[i] );
+		if (layerSet.layers[i].typename == "LayerSet") this.dumpLayers( layerSet.layers[i] );
+
 		this.setCurrentLayer( layerSet.layers[i] );
 		layerID = (layerSet.layers[i].isBackground) ? "BG" : cssToClip.getLayerAttr( "layerID" );
-		$.writeln("Layer[" + cssToClip.getLayerAttr( "itemIndex" ) + "] ID=" + layerID + " name: " + cssToClip.getLayerAttr( "name" ) );
+		this.debugText += ("Layer[" + cssToClip.getLayerAttr( "itemIndex" ) + "] ID=" + layerID + " name: " + cssToClip.getLayerAttr( "name" ) + '\n');
+		cssToClip.dumpAllLayerAttrs()
 	}
 }
 
@@ -1833,6 +1816,4 @@ cssToClip.dumpLayers = function( layerSet ) {
 //runCopyCSSFromScript = true; cssToClip.dumpLayers();
 
 // Backdoor to allow using this script as a library;
-if ((typeof( runCopyCSSFromScript ) == 'undefined')
-	|| (runCopyCSSFromScript == false))
-	cssToClip.copyLayerCSSToClipboard();
+if ((typeof( runCopyCSSFromScript ) == 'undefined') || (runCopyCSSFromScript == false)) cssToClip.copyLayerCSSToClipboard();
