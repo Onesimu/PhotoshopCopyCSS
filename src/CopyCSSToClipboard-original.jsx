@@ -1795,11 +1795,10 @@ cssToClip.dumpLayers = function( layerSet ) {
 
 	this.gatherLayerHtml(layerSet)
 	for (var i= 0; i < layerSet.layers.length; ++i) {
+		this.setCurrentLayer( layerSet.layers[i] )
 		if (layerSet.layers[i].typename == "LayerSet") this.dumpLayers( layerSet.layers[i] )
-		else {
-			this.setCurrentLayer( layerSet.layers[i] )
+		else 
 			this.gatherLayerHtml(layerSet.layers[i])
-		}
 	}
 }
 
