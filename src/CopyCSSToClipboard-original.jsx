@@ -68,6 +68,8 @@ const kSolidColorSheet		= 11;
 const kBackgroundSheet		= 12;
 const kHiddenSectionBounder	= 13;
 
+const kSheetKinds = ['kAnySheet', 'kPixelSheet', 'kAdjustmentSheet', 'kTextSheet', 'kVectorSheet', 'kSmartObjectSheet', 'kVideoSheet', 'kLayerGroupSheet', 'k3DSheet', 'kGradientSheet', 'kPatternSheet', 'kSolidColorSheet', 'kBackgroundSheet', 'kHiddenSectionBounder']
+
 // Tables to convert Photoshop UnitTypes into CSS types
 var unitIDToCSS = {};
 unitIDToCSS[unitAngle]			= "deg";
@@ -1791,14 +1793,13 @@ cssToClip.dumpAllLayerAttrs = function() {
 cssToClip.dumpLayers = function( layerSet ) {
 	if (typeof layerSet == "undefined") layerSet = app.activeDocument.activeLayer
 
+	this.gatherLayerHtml(layerSet)
 	for (var i= 0; i < layerSet.layers.length; ++i) {
-		if (layerSet.layers[i].typename == "LayerSet") this.dumpLayers( layerSet.layers[i] );
-
-		this.setCurrentLayer( layerSet.layers[i] );
-		this.gatherLayerHtml(layerSet.layers[i])
-
-		// this.debugText += ("Layer[" + cssToClip.getLayerAttr( "itemIndex" ) + "] ID=" + layerID + " name: " + cssToClip.getLayerAttr( "name" ) + '\n');
-		// cssToClip.dumpAllLayerAttrs()
+		if (layerSet.layers[i].typename == "LayerSet") this.dumpLayers( layerSet.layers[i] )
+		else {
+			this.setCurrentLayer( layerSet.layers[i] )
+			this.gatherLayerHtml(layerSet.layers[i])
+		}
 	}
 }
 
@@ -1816,10 +1817,14 @@ cssToClip.gatherLayerHtml = function (curLayer) {
 	var itemIndex = cssToClip.getLayerAttr( "itemIndex" )
 
 	var moduleName = '_' + layerID + '-' + itemIndex
+	var typename = curLayer.typename 
 
-	var comment = '\t<!-- ' + layerName + ' -->'
+	var comment = '\t<!-- ' + layerName + " " +  typename + " " +  kSheetKinds[layerKind] + ' -->'
 	var htmlText = '\t<div class="' + moduleName + '">' + textString + '</div>'
 	this.htmlText += ( comment + '\n' + htmlText + "\n");
+	
+	this.debugText += ("Layer[" + itemIndex + "] ID=" + layerID + " name: " + layerName + '\n');
+	// cssToClip.dumpAllLayerAttrs()
 }
 
 // Debug.  Uncomment one of these lines, and watch the output
