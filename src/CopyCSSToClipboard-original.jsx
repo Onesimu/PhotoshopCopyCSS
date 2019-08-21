@@ -1819,10 +1819,10 @@ cssToClip.gatherLayerHtml = function (curLayer, parentLayerId) {
 	var typename = curLayer.typename 
 
 	var comment = '\t<!-- ' + layerName + " " +  typename + " " +  kSheetKinds[layerKind] + ' -->'
-	var htmlText = '\t<div class="' + moduleName + '" pid="' + parentLayerId + '">' + textString + '</div>'
+	var htmlText = '\t<div class="' + moduleName + '" id="' + layerID + '" pid="' + parentLayerId + '" type="' + typename + '">' + textString + '</div>'
 	this.htmlText += ( comment + '\n' + htmlText + "\n");
 	
-	this.debugText += ("Layer[" + itemIndex + "] ID=" + layerID + " name: " + layerName + '\n');
+	// this.debugText += ("Layer[" + itemIndex + "] ID=" + layerID + " name: " + layerName + '\n');
 	// cssToClip.dumpAllLayerAttrs()
 }
 
