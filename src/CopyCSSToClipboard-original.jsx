@@ -1790,19 +1790,19 @@ cssToClip.dumpAllLayerAttrs = function() {
 }
 
 // Walk the document's layers and describe them.
-cssToClip.dumpLayers = function( layerSet ) {
+cssToClip.dumpLayers = function( layerSet, parentLayerId ) {
 	if (typeof layerSet == "undefined") layerSet = app.activeDocument.activeLayer
+	if(!parentLayerId) parentLayerId = 0
 
-	this.gatherLayerHtml(layerSet)
+	this.gatherLayerHtml(layerSet, parentLayerId)
 	for (var i= 0; i < layerSet.layers.length; ++i) {
 		this.setCurrentLayer( layerSet.layers[i] )
-		if (layerSet.layers[i].typename == "LayerSet") this.dumpLayers( layerSet.layers[i] )
-		else 
-			this.gatherLayerHtml(layerSet.layers[i])
+		if (layerSet.layers[i].typename == "LayerSet") this.dumpLayers( layerSet.layers[i], layerSet.id )
+		else this.gatherLayerHtml(layerSet.layers[i], layerSet.id)
 	}
 }
 
-cssToClip.gatherLayerHtml = function (curLayer) {
+cssToClip.gatherLayerHtml = function (curLayer, parentLayerId) {
 	var layerKind = this.currentPSLayerInfo.layerKind;
 
 	var layerName = this.layerNameToCSS( curLayer.name );
@@ -1819,7 +1819,7 @@ cssToClip.gatherLayerHtml = function (curLayer) {
 	var typename = curLayer.typename 
 
 	var comment = '\t<!-- ' + layerName + " " +  typename + " " +  kSheetKinds[layerKind] + ' -->'
-	var htmlText = '\t<div class="' + moduleName + '">' + textString + '</div>'
+	var htmlText = '\t<div class="' + moduleName + '" pid="' + parentLayerId + '">' + textString + '</div>'
 	this.htmlText += ( comment + '\n' + htmlText + "\n");
 	
 	this.debugText += ("Layer[" + itemIndex + "] ID=" + layerID + " name: " + layerName + '\n');
