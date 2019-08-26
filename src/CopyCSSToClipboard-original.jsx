@@ -930,8 +930,7 @@ cssToClip.copyCSSToClipboard = function() {
 }
 
 cssToClip.isCSSLayerKind = function( layerKind ) {
-	if (typeof layerKind == "undefined")
-		layerKind = this.currentPSLayerInfo.layerKind;
+	if (typeof layerKind == "undefined") layerKind = this.currentPSLayerInfo.layerKind;
 
 	switch (layerKind) {
 		case kVectorSheet:	return true;
@@ -939,7 +938,7 @@ cssToClip.isCSSLayerKind = function( layerKind ) {
 		case kPixelSheet:		return true;
 		case kLayerGroupSheet:  return true;
 	}
-	return false
+	return true
 }
 
 // Listen carefully:  When the Photoshop DOM *reports an index to you*, it uses one based
@@ -1650,7 +1649,7 @@ cssToClip.gatherLayerCSS = function() {
 	const itemIndex = cssToClip.getLayerAttr( "itemIndex" )
 	const moduleName = '_' + layerID + '-' + itemIndex
 
-	this.addText('/* ' + layerName + ' */')
+	this.addText('/* ' + layerName + " " +  kSheetKinds[layerKind] + ' */')
 	this.addText( (isCSSid ? "#" : ".") + moduleName + " {" );
 
 	this.pushIndent();
