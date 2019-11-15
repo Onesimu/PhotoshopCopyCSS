@@ -231,7 +231,7 @@
 				.replace(/\"{/g, '{').replace(/,\"}/g, '}')
 				// .replace(/\b/g, '"')
 				 + '}]'
-			return json
+			return json.replace(/,\{\}/g, '')
 		}
 		const jsonStr = trans(css)
 		console.log(jsonStr)
