@@ -202,6 +202,41 @@
 		}
 		</style>
 
+<script type="text/javascript">
+	const css = ` ._427-5 {
+		  background-image: url(背景.png);
+		  position: absolute;
+		  left: 0px;
+		  top: -161px;
+		  width: 750px;
+		  height: 1368px;
+		  z-index: 5;
+		}
+		/* 图层_0 kPixelSheet */
+		._163-2 {
+		  background-image: url(图层0.png);
+		  position: absolute;
+		  left: 0px;
+		  top: -128px;
+		  width: 750px;
+		  height: 1368px;
+		  z-index: 2;
+		}`
+		
+		const trans = cs => {
+			const json = '[{' + cs.replace(/\/\*(\s|.)*?\*\//g, '')
+				.replace(/\{/g, ':{').replace(/\}/g, '}},{').replace(/;/g, '";').replace(/:/g, ' : ')
+				.replace(/\s+/g, '"')
+				.replace(/\"{/g, '{').replace(/;\"}/g, '}').replace(/;/g, ',')
+				// .replace(/\b/g, '"')
+				 + '}]'
+			return json
+		}
+		const jsonStr = trans(css)
+		console.log(jsonStr)
+		const json = JSON.parse(jsonStr)
+		console.log(json)
+</script>
 
 	</body>
 </html>
