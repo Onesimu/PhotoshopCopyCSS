@@ -203,8 +203,146 @@
 		</style>
 
 <script type="text/javascript">
-	const css = ` ._427-5 {
-		  background-image: url(背景.png);
+	const css = `		/* 组_15 kLayerGroupSheet */
+		._441-22 {
+		  position: absolute;
+		  left: 0px;
+		  top: 0px;
+		  width: 750px;
+		  height: 1206px;
+		  z-index: 22;
+		}
+		/* 开通成功 kTextSheet */
+		._424-21 {
+		  font-size: 32px;
+		  font-family: "PingFangSC";
+		  color: rgb(0, 0, 0);
+		  text-transform: uppercase;
+		  line-height: 0.781;
+		  position: absolute;
+		  left: 310.383px;
+		  top: -32.776px;
+		  z-index: 21;
+		}
+		/* 图层_104 kPixelSheet */
+		._423-20 {
+		  background-image: url("图层104.png");
+		  position: absolute;
+		  left: 294px;
+		  top: -64px;
+		  width: 148px;
+		  height: 47px;
+		  z-index: 20;
+		}
+		/* 图层_103 kPixelSheet */
+		._422-19 {
+		  background-image: url("图层103.png");
+		  position: absolute;
+		  left: 0px;
+		  top: -128px;
+		  width: 750px;
+		  height: 128px;
+		  z-index: 19;
+		}
+		/* 组_14 kLayerGroupSheet */
+		._420-18 {
+		  position: absolute;
+		  left: 0px;
+		  top: 0px;
+		  width: 750px;
+		  height: 1206px;
+		  z-index: 18;
+		}
+		/* 即可获得7天看答案特权 kTextSheet */
+		._325-17 {
+		  font-size: 17.597px;
+		  font-family: "Adobe Heiti Std";
+		  color: rgb(144, 110, 15);
+		  text-transform: uppercase;
+		  line-height: 1.421;
+		  transform: matrix(2.20453840842956, 0, 0, 2.20453840842957, 0, 0);
+		  position: absolute;
+		  left: 272.581px;
+		  top: 719.821px;
+		  z-index: 17;
+		}
+		/* 圆角矩形_5 kVectorSheet */
+		._355-16 {
+		  border-radius: 44px;
+		  background-image: linear-gradient( -90deg, rgb(255,237,7) 0%, rgb(255,183,2) 100%);
+		  position: absolute;
+		  left: 95px;
+		  top: 666px;
+		  width: 572px;
+		  height: 89px;
+		  z-index: 16;
+		}
+		/* 组_13 kLayerGroupSheet */
+		._390-15 {
+		  position: absolute;
+		  left: -28px;
+		  top: -28px;
+		  width: 808px;
+		  height: 1264px;
+		  z-index: 15;
+		}
+		/* 矩形_2_拷贝 kVectorSheet */
+		._338-13 {
+		  border-width: 20px;
+		  border-color: rgb(255, 255, 255);
+		  border-style: solid;
+		  background-image: linear-gradient( 149deg, rgb(96,249,203) 0%, rgb(159,253,105) 100%);
+		  position: absolute;
+		  left: 256px;
+		  top: 816px;
+		  width: 265px;
+		  height: 266px;
+		  z-index: 13;
+		}
+		/* 圆角矩形_4_拷贝 kVectorSheet */
+		._352-11 {
+		  border-radius: 14px;
+		  background-color: rgb(255, 255, 255);
+		  position: absolute;
+		  left: 98px;
+		  top: 734px;
+		  width: 564px;
+		  height: 414px;
+		  z-index: 11;
+		}
+		/* 圆角矩形_4 kVectorSheet */
+		._351-10 {
+		  border-radius: 15px;
+		  background-color: rgb(255, 255, 255);
+		  opacity: 0.502;
+		  position: absolute;
+		  left: 72px;
+		  top: 709px;
+		  width: 616px;
+		  height: 463px;
+		  z-index: 10;
+		}
+		/* 组_1 kLayerGroupSheet */
+		._33-8 {
+		  position: absolute;
+		  left: 0px;
+		  top: 0px;
+		  width: 750px;
+		  height: 1206px;
+		  z-index: 8;
+		}
+		/* _s_背景 kLayerGroupSheet */
+		._428-6 {
+		  position: absolute;
+		  left: 0px;
+		  top: 0px;
+		  width: 750px;
+		  height: 1206px;
+		  z-index: 6;
+		}
+		/* 背景 kPixelSheet */
+		._427-5 {
+		  background-image: url("背景.png");
 		  position: absolute;
 		  left: 0px;
 		  top: -161px;
@@ -214,7 +352,7 @@
 		}
 		/* 图层_0 kPixelSheet */
 		._163-2 {
-		  background-image: url(图层0.png);
+		  background-image: url("图层0.png");
 		  position: absolute;
 		  left: 0px;
 		  top: -128px;
@@ -237,6 +375,17 @@
 		console.log(jsonStr)
 		const json = JSON.parse(jsonStr)
 		console.log(json)
+		
+		
+		var testContent = '.class1{ color:red }.class2  {     color:blue }';
+		const re = /\.(样式名称)\b[^\{\}]{0,10}\{[^\{\}]*\}/
+		function getCss(className){
+			var reStr = '\.' + className + '[ \s]*\{[^\}]+?\}';
+			var re = new RegExp(reStr, "gi");
+			return testContent.match(re);
+		}
+		console.log(getCss('class1'));
+		console.log(getCss('class2'));
 </script>
 
 	</body>
