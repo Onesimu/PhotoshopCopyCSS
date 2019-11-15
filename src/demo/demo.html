@@ -361,12 +361,21 @@
 		  z-index: 2;
 		}`
 		
+		// 查找目标    ^(.*):\s(.*)$  
+		
+		// 替换为   '\1':'\2'
+		
+		// ^和$表示匹配一行，\s表示空格
+		
+		// 在sublime和notepad++都试过是
+		
 		const trans = cs => {
 			const json = '[{' + cs.replace(/\/\*(\s|.)*?\*\//g, '')
 				.replace(/\{/g, ':{').replace(/\}/g, '}},{')
-				.replace(/:/g, ' : ').replace(/;/g, '",')
-				.replace(/\s+/g, '"')
-				.replace(/\"{/g, '{').replace(/,\"}/g, '}')
+				.replace(/^(.*):\s(.*)$/g, '"\1":"\2"')
+				// .replace(/:/g, ' : ').replace(/;/g, '",')
+				// .replace(/\s+/g, '"')
+				// .replace(/\"{/g, '{').replace(/,\"}/g, '}')
 				// .replace(/\b/g, '"')
 				 + '}]'
 			return json.replace(/,\{\}/g, '')
