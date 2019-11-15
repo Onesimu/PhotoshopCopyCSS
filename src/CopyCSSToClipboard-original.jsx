@@ -1798,7 +1798,7 @@ cssToClip.dumpLayers = function( layerSet, parentLayerId ) {
 		this.setCurrentLayer( layerSet.layers[i] )
 		if (layerSet.layers[i].typename == "LayerSet") this.dumpLayers( layerSet.layers[i], layerSet.id )
 		else this.gatherLayerHtml(layerSet.layers[i], layerSet.id, false)
-		if(i == layerSet.layers.length - 1) this.htmlText += '\t</div>\n'
+		// if(i == layerSet.layers.length - 1) this.htmlText += '\t</div>\n'
 	}
 }
 
@@ -1821,7 +1821,8 @@ cssToClip.gatherLayerHtml = function (curLayer, parentLayerId, isLayerSet) {
 	var comment = '\t<!-- ' + layerName + " " +  typename + " " +  kSheetKinds[layerKind] + ' -->'
 	var htmlText = '\t<div class="' + moduleName + '" id="' + layerID + '" pid="' + parentLayerId + '" type="' + typename + '">' 
 
-	if(!isLayerSet){ htmlText += textString + '</div>'}
+	// if(!isLayerSet)
+		htmlText += textString + '</div>'
 	
 	this.htmlText += ( comment + '\n' + htmlText + "\n");
 	
